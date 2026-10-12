@@ -26,6 +26,11 @@ def main():
     sys.argv = [str(root / "tools" / "check_freecad_runtime.py")]
     sys.path[:0] = [str(root), args.lib_dir, args.ext_dir, str(root / "tools")]
     import FreeCAD as App
+    # Debian splits Python workbench packages from the extension library.
+    # Use only the selected host resource directory, never another runtime.
+    mod_dir = Path(App.getResourceDir()) / "Mod"
+    if mod_dir.is_dir():
+        sys.path.insert(0, str(mod_dir))
     import Part
     actual = ".".join(App.Version()[:3])
     if actual != args.expect_version:
@@ -52,11 +57,24 @@ import runpy, sys, traceback
 sys.path[:0] = [lib_dir, ext_dir]
 try:
     import FreeCAD as App
+    from pathlib import Path
+    mod_dir = Path(App.getResourceDir()) / "Mod"
+    if mod_dir.is_dir():
+        sys.path.insert(0, str(mod_dir))
     assert '.'.join(App.Version()[:3]) == expected
     import FreeCADGui as Gui
     # FreeCAD keeps Log/Msg/Err and Workbench in __main__. Preserve it during
     # initialization and command registration; do not run smoke as __main__.
     Gui.showMainWindow()
+    # Minimal GUI startup does not discover Python workbench loaders on Debian.
+    # Register only the two official loaders needed by native edit tasks.
+    for module, name in (("PartDesign", "PartDesignWorkbench"),
+                         ("Sketcher", "SketcherWorkbench")):
+        loader = mod_dir / module / "InitGui.py"
+        if name not in Gui.listWorkbenches() and loader.is_file():
+            runpy.run_path(str(loader), run_name='etux_native_loader',
+                init_globals={"Workbench": Gui.Workbench, "FreeCAD": App,
+                              "Gui": Gui, "FreeCADGui": Gui})
     runpy.run_path(smoke, run_name='etux_gui_smoke')
     from PySide import QtCore
     print('QT_VERSION=' + QtCore.qVersion(), flush=True)

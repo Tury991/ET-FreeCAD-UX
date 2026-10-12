@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from et_freecad_ux.adapters.freecad import AboutCommand, register_commands
-from et_freecad_ux.core.catalog import ABOUT_COMMAND, GROUPS
+from et_freecad_ux.core.catalog import ABOUT_COMMAND, HELP_COMMAND, GROUPS, NATIVE_COMMANDS
 from et_freecad_ux.ui.workbench import ICON, create_workbench_class
 
 
@@ -43,21 +43,21 @@ class WorkbenchTests(unittest.TestCase):
         module = importlib.import_module('et_freecad_ux.adapters.freecad')
         importlib.reload(module).register_commands(app, gui)
         self.assertIs(registry[ABOUT_COMMAND], original)
-        self.assertEqual(len(registry), 1)
+        self.assertEqual(len(registry), 2)
 
     def test_initialize_and_activation_do_not_duplicate_ui(self):
         gui = Mock()
-        gui.listCommands.return_value = []
+        gui.listCommands.return_value = list(NATIVE_COMMANDS) + [ABOUT_COMMAND, HELP_COMMAND]
         wb = create_workbench_class(HostWorkbench)()
-        with patch.dict(sys.modules, {'FreeCAD': Mock(), 'FreeCADGui': gui}):
+        with patch.dict(sys.modules, {'FreeCAD': Mock(), 'FreeCADGui': gui, 'PartDesignGui': Mock(), 'SketcherGui': Mock()}):
             wb.Initialize()
             wb.Initialize()
             for _ in range(3):
                 wb.Activated()
                 wb.Deactivated()
-        self.assertEqual(wb.toolbars, [(g.label, list(g.commands)) for g in GROUPS])
-        self.assertEqual(wb.menus, wb.toolbars)
-        gui.addCommand.assert_called_once()
+        self.assertEqual(wb.toolbars, [("ET UX " + g.label, list(g.commands)) for g in GROUPS])
+        self.assertEqual(wb.menus, [(["ET UX", g.label], list(g.commands)) for g in GROUPS])
+        gui.addCommand.assert_not_called()
         self.assertEqual(wb.GetClassName(), 'Gui::PythonWorkbench')
         self.assertTrue(Path(ICON).is_file())
 

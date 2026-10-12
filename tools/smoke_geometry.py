@@ -66,3 +66,57 @@ class GeometryTests(unittest.TestCase):
             self.assertTrue(box.Shape.isValid())
             self.assertAlmostEqual(box.Length.Value, 2.0, places=7)
             self.assertAlmostEqual(box.Shape.Volume, 24.0, places=7)
+
+    def mechanical_profile(self):
+        import Sketcher
+        body = self.doc.addObject('PartDesign::Body', 'Body')
+        sketch = body.newObject('Sketcher::SketchObject', 'Sketch')
+        circle = sketch.addGeometry(Part.Circle(App.Vector(0, 0, 0), App.Vector(0, 0, 1), 5), False)
+        radius = sketch.addConstraint(Sketcher.Constraint('Radius', circle, 5.0))
+        self.doc.recompute()
+        return body, sketch, radius
+
+    def mechanical_pad(self):
+        body, sketch, radius = self.mechanical_profile()
+        pad = body.newObject('PartDesign::Pad', 'Pad')
+        pad.Profile, pad.Length = sketch, 10
+        self.doc.recompute()
+        return body, sketch, pad, radius
+
+    def test_body_creation(self):
+        body = self.doc.addObject('PartDesign::Body', 'Body')
+        self.assertEqual(body.TypeId, 'PartDesign::Body')
+        self.assertIs(body.Document, self.doc)
+
+    def test_sketch_creation_in_body(self):
+        body, sketch, radius = self.mechanical_profile()
+        self.assertIn(sketch, body.Group)
+        self.assertEqual(sketch.TypeId, 'Sketcher::SketchObject')
+        self.assertEqual(sketch.solve(), 0)
+        self.assertEqual(sketch.ConstraintCount, 1)
+
+    def test_parametric_pad_creation(self):
+        import math
+        body, sketch, pad, radius = self.mechanical_pad()
+        self.assertEqual(pad.Profile[0], sketch)
+        self.assertEqual(body.Tip, pad)
+        self.assertTrue(pad.Shape.isValid())
+        self.assertEqual(len(pad.Shape.Solids), 1)
+        self.assertAlmostEqual(pad.Shape.Volume, math.pi * 25 * 10, places=6)
+
+    def test_sketch_dimension_recomputes_pad_with_undo_redo(self):
+        import math
+        self.doc.UndoMode = 1
+        body, sketch, pad, radius = self.mechanical_pad()
+        self.doc.openTransaction('Change sketch radius')
+        sketch.setDatum(radius, App.Units.Quantity('7 mm'))
+        self.doc.recompute()
+        self.doc.commitTransaction()
+        self.assertTrue(pad.Shape.isValid())
+        self.assertAlmostEqual(pad.Shape.Volume, math.pi * 49 * 10, places=6)
+        self.doc.undo()
+        self.doc.recompute()
+        self.assertAlmostEqual(pad.Shape.Volume, math.pi * 25 * 10, places=6)
+        self.doc.redo()
+        self.doc.recompute()
+        self.assertAlmostEqual(pad.Shape.Volume, math.pi * 49 * 10, places=6)

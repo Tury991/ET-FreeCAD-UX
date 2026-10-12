@@ -1,8 +1,7 @@
 """Standard FreeCAD workbench, with no global toolbar or menu replacement."""
 from pathlib import Path
 
-from et_freecad_ux.adapters.freecad import register_commands
-from et_freecad_ux.core.catalog import GROUPS
+from et_freecad_ux.adapters.freecad import register_commands, load_native_commands, workspace_groups
 
 
 ICON = str(Path(__file__).resolve().parents[2] / "Resources" / "icons" / "etux.svg")
@@ -13,7 +12,7 @@ def create_workbench_class(base):
 
     class ETUXWorkbench(base):
         MenuText = "ET FreeCAD UX"
-        ToolTip = "Base sperimentale per workflow CAD più accessibili"
+        ToolTip = "Mechanical Workspace: Sketch, Features, Reference, Tools"
         Icon = ICON
 
         def Initialize(self):
@@ -22,10 +21,11 @@ def create_workbench_class(base):
             import FreeCAD as App
             import FreeCADGui as Gui
 
+            load_native_commands(App)
             register_commands(App, Gui)
-            for group in GROUPS:
-                self.appendToolbar(group.label, list(group.commands))
-                self.appendMenu(group.label, list(group.commands))
+            for group in workspace_groups(App, Gui):
+                self.appendToolbar("ET UX " + group.label, list(group.commands))
+                self.appendMenu(["ET UX", group.label], list(group.commands))
             self._etux_initialized = True
 
         def Activated(self):

@@ -1,5 +1,11 @@
 # FreeCAD 1.1.3 nel cloud: installazione e prove
 
+## Aggiornamento V0.2
+
+Il 12 ottobre 2026 (Europe/Rome), la suite Mechanical Workspace ha superato **8 unitari, 8 geometrici e smoke GUI** sia su 1.1.3 sia su 1.0.0. Dettagli attuali: [VALIDATION_V02.md](VALIDATION_V02.md). I conteggi 4/4 e lo stato V0.1 nelle sezioni successive documentano la verifica precedente.
+
+Il runner aggiunge al percorso Python `App.getResourceDir()/Mod` del solo runtime selezionato e, nel bootstrap GUI minimale, registra i loader ufficiali PartDesign/Sketcher se assenti. Questo consente ai task nativi di attivare le rispettive workbench su Debian 1.0. Il namespace `__main__`, la versione esatta e gli exit code restano preservati.
+
 ## Provenienza e installazione
 
 Verifica effettuata il **12 ottobre 2026**, Linux x86_64, ambiente cloud Debian. La [release ufficiale 1.1.3](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.3) contiene l'AppImage `FreeCAD_1.1.3-Linux-x86_64-py311.AppImage`. Il tag Git punta a `145529fe741292ff0b3977a01195bf0247425794`, corrispondente alla versione mostrata dal runtime. È presente anche il tag 1.1.4: non è stato sostituito al riferimento richiesto.
