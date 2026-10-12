@@ -39,7 +39,7 @@ Preferenze future: namespace `User parameter:BaseApp/Preferences/Mod/ETFreeCADUX
 
 ## Compatibilità e test
 
-Baseline iniziale FreeCAD 1.0.x; libreria Python pura compatibile con Python 3.8+. Qt non è importato dal prodotto iniziale. Per widget futuri usare il facade PySide fornito da FreeCAD e isolare differenze Qt5/Qt6 negli adapter, con prove su build reali. Non dedurre il binding solo dalla versione di FreeCAD.
+Riferimento principale FreeCAD 1.1.3, con 1.0 come compatibilità secondaria; libreria Python pura compatibile con Python 3.8+. Qt non è importato dal prodotto iniziale. Per widget futuri usare il facade PySide fornito da FreeCAD e isolare differenze Qt5/Qt6 negli adapter, con prove su build reali. Non dedurre il binding solo dalla versione di FreeCAD.
 
 Tre livelli di verifica:
 
@@ -47,8 +47,12 @@ Tre livelli di verifica:
 2. Smoke con API reali: registrazione tramite `InitGui.py`, menu/toolbar, esecuzione e tre cambi di workbench senza duplicazione. Il test cloud usa una GUI offscreen minimale e non il loader completo degli addon.
 3. Accettazione desktop futura: scoperta automatica da `Mod`, riavvio, navigazione da tastiera, scala DPI, temi, cambio documento, chiusura/riapertura, Undo/Redo per le azioni di modellazione e coesistenza con addon.
 
-Solo i primi due livelli sono stati eseguiti nell'ambiente attuale. Nessun test di modellazione è pertinente al comando iniziale, che è informativo. La prova CAD dell'onboarding riguarda il motore host, non dimostra funzionalità di modellazione ET UX.
+I primi due livelli sono verificati su 1.1.3/Qt6 e 1.0/Qt5. Il runner aggiunge quattro prove geometriche native (solido, booleano, Undo/Redo e FCStd) in documenti temporanei; non sono funzioni di modellazione ET UX. Il comando iniziale resta informativo. Il livello desktop rimane da eseguire. Vedi [requisiti](REQUIREMENTS.md) e [runtime](FREECAD_113_CLOUD.md).
 
 ## Decisioni rinviate
 
-Licenza e metadati di distribuzione, release supportate oltre 1.0, rendering Ribbon, schema dei profili, traduzioni Qt, scorciatoie e navigazione SolidWorks-like. Stabilire queste scelte con piccoli prototipi e criteri della roadmap, evitando dipendenze non necessarie.
+Licenza e metadati di distribuzione, release oltre quelle verificate, integrazione opzionale Nxt e rendering Ribbon, schema dei profili, traduzioni Qt, scorciatoie e navigazione SolidWorks-like. Stabilire queste scelte con piccoli prototipi e criteri della roadmap, evitando dipendenze non necessarie.
+
+## Strategia di riuso pre-V0.2
+
+Nxt è un addon trasversale alle workbench con model panel, inspector, menu TOML e servizi di sessione; non è un renderer Ribbon intercambiabile. ET UX mantiene il proprio core Python puro e si concentra sul percorso guidato e sui prerequisiti dei comandi nativi. Prima di introdurre uno strumento avanzato, verificare se un comando Nxt o nativo già copre il bisogno. La scelta e i confini sono descritti nel [confronto](EXTENSIONS_COMPARISON.md). Non importare servizi Nxt o FCBinding per riutilizzarli direttamente.

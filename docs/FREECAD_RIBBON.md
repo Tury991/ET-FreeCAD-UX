@@ -50,3 +50,7 @@ Per il successivo esperimento:
 5. Chiarire licenze prima di distribuire derivazioni. Se non esiste un'integrazione stabile o reversibile, mantenere la UI standard e prototipare un renderer piccolo e circoscritto.
 
 La decisione è rivedibile dopo questi risultati. Non è dimostrato che Ribbon sia incompatibile con ET UX, né che l'integrazione funzioni già.
+
+## Aggiornamento pre-V0.2
+
+Il riferimento ET UX è ora FreeCAD 1.1.3. È stata riesaminata la stessa revisione Ribbon; i minimi del suo package.xml non certificano 1.1.3/Qt6. Il runtime ET UX passa i test con Qt6, ma Ribbon non è stato eseguito. La decisione originale resta valida per il renderer; prima di ampliare workflow, tree o inspector consultare anche [Nxt](FREECAD_NXT.md) e il [confronto aggiornato](EXTENSIONS_COMPARISON.md).
