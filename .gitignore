@@ -3,3 +3,6 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Task scratch files and runtime logs
+work/

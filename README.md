@@ -1,90 +1,73 @@
-# ET-FreeCAD-UX
+# ET-FreeCAD-UX — V0.2 Mechanical Workspace
 
-Workbench Python sperimentale per rendere **organizzazione dei comandi e workflow** di FreeCAD più familiari a chi usa SolidWorks, mantenendo il modello parametrico e le API native di FreeCAD. Il progetto non modifica il sorgente di FreeCAD e non è affiliato a SolidWorks o Dassault Systèmes.
+Workbench Python per FreeCAD **1.1.3**, con organizzazione originale dei comandi ispirata al workflow dei CAD parametrici professionali. Riusa Part Design e Sketcher; modello, solver, albero delle feature, proprietà, task panel e Undo/Redo restano nativi. Nessun codice o asset proprietario SolidWorks è copiato. Il progetto non è affiliato a SolidWorks o Dassault Systèmes.
 
-## Stato iniziale
+## Comandi
 
-Il repository originale conteneva soltanto questo titolo, senza codice, manifest o test. Questa prima base introduce registrazione della workbench, un menu e una toolbar `ET UX`, un comando informativo nel pannello Report e test del ciclo di vita. Non implementa ancora ribbon, modellazione guidata, task panel, gestione degli assiemi o scorciatoie personalizzate.
+Menu `ET UX` con quattro sottomenu e quattro toolbar native:
 
-La scelta iniziale è una **workbench autonoma con UI standard**, predisposta concettualmente a integrazioni opzionali FreeCAD-Ribbon e FreeCAD-Nxt. Nessun codice Ribbon è incorporato e nessun addon esterno è richiesto. Motivazioni: [confronto Nxt/Ribbon](docs/EXTENSIONS_COMPARISON.md) e [studio Ribbon](docs/FREECAD_RIBBON.md). La strategia pre-V0.2 non aggiunge funzioni di modellazione alla V0.1.
+| Gruppo | Azioni |
+| --- | --- |
+| Sketch | Nuovo sketch nel Body, modifica/chiusura sketch, rettangolo, cerchio, distanza, raggio |
+| Features | Body, Pad, Pocket, Fillet, Chamfer, Revolution |
+| Reference | Piano, linea, punto, sistema di coordinate, SubShapeBinder |
+| Tools | Nuovo documento, salva, Undo/Redo, ricalcolo, preferenze native, guida e informazioni |
 
-## Installazione manuale di sviluppo
+I pulsanti riusano direttamente gli ID registrati da FreeCAD: icone, traduzioni, abilitazione contestuale, selezione e gestione del Body sono quelle native. Non viene imposto un Body né cambiata automaticamente la workbench. La modifica dello sketch può attivare Sketcher secondo il comportamento nativo; al termine torna a ET FreeCAD UX se necessario.
 
-1. Usa FreeCAD **1.1.3** come riferimento principale; FreeCAD 1.0 resta una compatibilità secondaria verificata nei limiti della matrice di test. Python è quello incluso in FreeCAD; i test puri richiedono Python 3.8 o successivo. Non installare un secondo binding Qt nel Python di FreeCAD.
-2. Nella console Python di FreeCAD, esegui `print(App.getUserAppDataDir())` per trovare la directory utente effettiva.
-3. Chiudi FreeCAD. Colloca o collega questa intera directory in `<directory utente>/Mod/ET-FreeCAD-UX`, con `InitGui.py` direttamente nella root dell'addon. Se esiste già una directory, preservala prima di sostituirla. Su Windows una copia è sufficiente; il collegamento è facoltativo.
-4. Riavvia FreeCAD e seleziona **ET FreeCAD UX**. Il menu `ET UX → Informazioni su ET FreeCAD UX` scrive versione e scopo nel pannello Report (Visualizza → Pannelli → Report).
-5. Per rimuoverla, chiudi FreeCAD e rimuovi solo la copia o il collegamento dell'addon dalla directory `Mod`. Non viene salvata una configurazione globale ET UX.
+All'inizializzazione vengono caricati solo `PartDesignGui` e `SketcherGui` e controllato `Gui.listCommands()`. Un comando assente viene omesso con un messaggio nel pannello Report; `Tools → Guida Mechanical Workspace` elenca nuovamente le capacità mancanti e spiega i prerequisiti. Non si inventano alias per versioni non verificate. Errori geometrici e selezioni non valide usano i messaggi e i task nativi di FreeCAD.
 
-Per i task cloud usa il checkout esistente, senza creare worktree salvo richiesta esplicita. Non è ancora prevista distribuzione tramite Addon Manager: metadati `package.xml`, licenza e matrice multipiattaforma vanno completati prima della pubblicazione.
+Non sono richiesti Ribbon, Nxt, pacchetti pip o un binding Qt esterno. ET UX non scrive preferenze globali; il comando Preferenze apre il dialogo nativo, dove le modifiche restano una scelta esplicita dell'utente.
 
-## Verifiche
+## Installazione Windows e Linux
 
-Dalla root del repository, senza FreeCAD e senza dipendenze aggiuntive:
+1. In FreeCAD apri Visualizza → Pannelli → Console Python ed esegui `print(App.getUserAppDataDir())`. Usa il percorso restituito, poiché varia tra installazioni.
+2. Chiudi FreeCAD. Scarica o clona il branch `feature/mechanical-workspace-v0.2` e colloca la directory completa in `<percorso restituito>/Mod/ET-FreeCAD-UX`. `InitGui.py` deve essere direttamente nella root dell'addon, senza una seconda cartella annidata. Preserva eventuali copie precedenti.
+3. **Windows:** copia la directory con Esplora file; il percorso è tipicamente sotto `%APPDATA%\FreeCAD`, ma il valore della console è autorevole.
+4. **Linux:** copia la directory oppure crea un collegamento con `ln -s /percorso/checkout "<directory utente>/Mod/ET-FreeCAD-UX"`, dopo aver creato `Mod`. Non sostituire un collegamento già presente senza controllarlo.
+5. Riavvia e seleziona **ET FreeCAD UX** nel selettore delle workbench. Abilita il pannello Report per leggere la guida e le eventuali diagnosi.
+
+Per rimuoverla, chiudi FreeCAD e rimuovi solo la copia o il collegamento dell'addon. Addon Manager, `package.xml` e licenza di distribuzione sono rinviati: l'assenza di `LICENSE` non concede una licenza open source.
+
+## Primo test manuale
+
+1. Seleziona ET FreeCAD UX. In Tools crea un documento; in Features crea un Body. Con più Body, attiva quello desiderato con doppio clic nell'albero.
+2. In Sketch crea uno sketch sul piano XY. Disegna un cerchio centrato sull'origine e assegna un vincolo di raggio di **5 mm**. Chiudi lo sketch; torna a ET UX se Sketcher è rimasta attiva.
+3. Seleziona lo sketch nell'albero. In Features scegli Pad, imposta **10 mm** e conferma nel task panel nativo. Volume atteso: circa **785,398 mm³**.
+4. Riapri lo sketch con Modifica sketch e cambia il raggio a **7 mm**. Chiudi e ricalcola con Tools: volume atteso circa **1539,380 mm³**. Verifica Undo/Redo e modifica anche `Length` del Pad nel pannello proprietà.
+5. Seleziona gli spigoli per provare Fillet/Chamfer; crea un secondo sketch su una faccia per Pocket. Per Revolution usa un profilo adatto e scegli l'asse nel task nativo. Conferma o annulla ciascun task prima del successivo.
+6. Salva FCStd, chiudi e riapri. Alterna ET UX e Part Design tre volte: devono esserci una sola toolbar per gruppo e un solo menu ET UX. Ripeti anche senza documento e con due Body.
+
+## Test automatici
+
+Dalla root, senza host o dipendenze esterne:
 
 ```sh
 python3 -m unittest discover -s tests -v
 ```
 
-Nella console Python di FreeCAD già avviato, con il percorso assoluto del checkout:
-
-```python
-import runpy
-runpy.run_path('/percorso/ET-FreeCAD-UX/tools/smoke_freecad.py', run_name='etux_gui_smoke')
-```
-
-Lo smoke test registra la workbench, verifica menu, toolbar e comando e ripete tre attivazioni/disattivazioni, ripristinando la workbench precedente. Usare una sessione di sviluppo: la registrazione resta nella sessione fino alla chiusura. Il test non modifica documenti.
-
-## Runtime cloud FreeCAD 1.1.3
-
-Installazione affiancata all'1.0 di sistema, fuori dal checkout, senza privilegi di amministratore:
+Con il runtime ufficiale Linux x86_64 già installato:
 
 ```sh
 bash tools/install_freecad113.sh
 bash tools/test_freecad113.sh
 ```
 
-Il primo script scarica l'AppImage ufficiale Linux x86_64, verifica il SHA256 fissato e la estrae senza FUSE in `/workspace/.local/freecad/1.1.3`. Il secondo usa **il Python dell'AppImage**, un profilo XDG temporaneo e Qt offscreen. Non installa binding Qt da pip e non sostituisce il FreeCAD di sistema. `ETUX_FREECAD_INSTALL_DIR` permette un percorso assoluto alternativo fuori dal checkout.
+Il runner controlla la versione esatta, usa il Python dell'AppImage e un profilo XDG temporaneo con Qt offscreen. `--geometry-only` esegue unitari e geometria senza dichiarare verificata la GUI. Installazione, checksum e comando di regressione 1.0: [guida cloud](docs/FREECAD_113_CLOUD.md).
 
-Esito atteso: `ETUX_RUNTIME_TESTS_OK version=1.1.3 unit=4 geometry=4 gui=True` con exit code 0. Per verificare solo unitari e geometria: `bash tools/test_freecad113.sh --geometry-only`. La versione viene controllata prima dei test: un 1.0 caricato al posto di 1.1.3 fallisce esplicitamente.
+In una sessione GUI di sviluppo, senza task aperti:
 
-La compatibilità secondaria 1.0 si verifica nella macchina Debian con:
-
-```sh
-profile="$(mktemp -d /tmp/etux-freecad10.XXXXXX)"
-XDG_CACHE_HOME="$profile/cache" XDG_CONFIG_HOME="$profile/config" XDG_DATA_HOME="$profile/data" \
-  /usr/bin/python3 tools/check_freecad_runtime.py \
-  --expect-version 1.0.0 --lib-dir /usr/lib/freecad-python3/lib --ext-dir /usr/share/freecad/Ext
-result=$?
-rm -rf "$profile"
-exit "$result"
+```python
+import runpy
+runpy.run_path('/percorso/ET-FreeCAD-UX/tools/smoke_freecad.py', run_name='etux_gui_smoke')
 ```
 
-Questi percorsi 1.0 sono specifici della macchina Debian. Eseguire il blocco in una shell dedicata perché `exit` ne preserva l'esito. Il Python predefinito della macchina non coincide con quello del runtime CAD.
+Lo smoke registra la workbench se necessario e crea/chiude un documento temporaneo: verifica gruppi, disponibilità, assenza di duplicati, comandi Body e Sketch, Body attivo e apertura del task Pad su uno sketch costruito con le API native. Non automatizza il disegno interattivo o l'accettazione dei task. La registrazione rimane nella sessione.
 
-**Verificati su Linux x86_64:** 4 test unitari originali, 4 test geometrici (solido, differenza booleana, Undo/Redo, roundtrip FCStd) e smoke GUI offscreen sia su 1.1.3/Qt6 sia su 1.0.0/Qt5. I test geometrici esercitano le API native in documenti temporanei, senza modificare il motore geometrico. Dettagli, requisiti, checksum e problemi risolti: [runtime cloud](docs/FREECAD_113_CLOUD.md) e [requisiti](docs/REQUIREMENTS.md).
+Esiti V0.2 e limiti: [rapporto di verifica](docs/VALIDATION_V02.md). L'offscreen non certifica ergonomia desktop, rendering OpenGL, loader completo dopo riavvio o Windows/macOS.
 
-**Non verificati:** installazione tramite loader completo dopo riavvio, interazione visiva desktop, Windows/macOS e coesistenza runtime con Ribbon/Nxt. L'import dei moduli QtQuick nell'AppImage è verificato; non dimostra che Nxt o le sue superfici QML funzionino. Il supporto a versioni diverse da quelle della matrice non è una garanzia.
+## Architettura e sviluppo
 
-## Struttura
+`core/catalog.py` contiene gruppi immutabili e filtro delle capacità; `adapters/freecad.py` carica i moduli pubblici e registra soltanto i comandi informativi ETUX; `ui/workbench.py` costruisce menu e toolbar una sola volta. `Init.py` non importa la GUI, `InitGui.py` registra la workbench. Nessun riferimento persistente ai documenti, observer o timer.
 
-```text
-Init.py / InitGui.py       ingressi FreeCAD, senza side effect sul documento
-et_freecad_ux/
-  core/catalog.py         gruppi di comandi immutabili, Python puro
-  adapters/freecad.py     registrazione e accesso alle API host
-  ui/workbench.py         lifecycle e menu/toolbar standard
-Resources/icons/etux.svg   icona originale del progetto
-tests/                    contratti host con fake e test senza GUI
-tools/                    installazione runtime, runner e smoke host
-docs/ARCHITECTURE.md       confini, workflow e compatibilità
-docs/ROADMAP.md            milestone con criteri di accettazione
-docs/FREECAD_RIBBON.md     ricerca e decisione iniziale
-docs/FREECAD_NXT.md        analisi statica dei componenti Nxt
-docs/EXTENSIONS_COMPARISON.md  strategia di riuso, licenze e compatibilità
-docs/FREECAD_113_CLOUD.md  runtime e risultati riproducibili
-docs/REQUIREMENTS.md       requisiti principali e opzionali
-AGENTS.md                 regole per i contributi futuri
-```
-
-Leggi [architettura](docs/ARCHITECTURE.md) e [roadmap](docs/ROADMAP.md) prima di introdurre funzionalità. La licenza del progetto è ancora da definire prima della distribuzione; l'assenza di `LICENSE` non concede una licenza open source. La base è scritta per questo repository, senza codice o asset copiati da SolidWorks o Ribbon.
+Vedi [architettura](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [requisiti](docs/REQUIREMENTS.md) e [confronto delle estensioni](docs/EXTENSIONS_COMPARISON.md). Tree, inspector e renderer Ribbon/Nxt non sono duplicati.
