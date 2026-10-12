@@ -1,5 +1,10 @@
 # Studio FreeCAD-Ribbon e decisione iniziale
 
+**Decisione V0.3a:** la ricerca storica sotto resta valida per upstream;
+la richiesta esplicita di un prototipo reversibile giustifica ora un renderer
+locale circoscritto. [RIBBON_V03A.md](RIBBON_V03A.md) aggiorna confronto,
+raccomandazione e criteri, senza incorporare codice upstream.
+
 ## Fonti e metodo
 
 Analisi statica effettuata il **12 ottobre 2026** sul repository [APEbbers/FreeCAD-Ribbon](https://github.com/APEbbers/FreeCAD-Ribbon), branch `main`, commit **b48a2c55d881d870ce98a5219e98afb0f5e3cce4**. È la variante indicata dal catalogo ufficiale [FreeCAD-addons](https://github.com/FreeCAD/FreeCAD-addons/blob/9dbf44fbbc7f0260aa07b21468914e531a979416/.gitmodules). Il README riconosce come predecessori Geolta/FreeCAD-Ribbon e HakanSeven12/Modern-UI: non vanno confusi con la variante qui esaminata.

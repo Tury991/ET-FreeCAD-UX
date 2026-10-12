@@ -55,6 +55,8 @@ def main():
              args.expect_version)) + '''
 import runpy, sys, traceback
 sys.path[:0] = [lib_dir, ext_dir]
+# The host must not try to open Python's stdin marker as a CAD document.
+sys.argv = ['FreeCAD']
 try:
     import FreeCAD as App
     from pathlib import Path
@@ -83,7 +85,14 @@ try:
         print('QTQUICK_MODULES_AVAILABLE=True', flush=True)
     except ImportError:
         print('QTQUICK_MODULES_AVAILABLE=False', flush=True)
+    Gui.activateWorkbench('ETUXWorkbench')
+    wb = Gui.activeWorkbench()
+    wb.setRibbonEnabled(True)
+    assert wb._etux_ribbon.bar is not None
     Gui.getMainWindow().close()
+    assert wb._etux_ribbon.bar is None
+    QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+    print('ETUX_RIBBON_CLOSE_OK', file=sys.__stdout__, flush=True)
 except Exception:
     traceback.print_exc(file=sys.__stderr__)
     raise SystemExit(1)

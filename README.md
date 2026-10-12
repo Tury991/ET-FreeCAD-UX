@@ -1,8 +1,29 @@
-# ET-FreeCAD-UX — V0.2 Mechanical Workspace
+# ET-FreeCAD-UX — V0.3a Ribbon sperimentale
 
 Workbench Python per FreeCAD **1.1.3**, con organizzazione originale dei comandi ispirata al workflow dei CAD parametrici professionali. Riusa Part Design e Sketcher; modello, solver, albero delle feature, proprietà, task panel e Undo/Redo restano nativi. Nessun codice o asset proprietario SolidWorks è copiato. Il progetto non è affiliato a SolidWorks o Dassault Systèmes.
 
 ## Comandi
+
+La V0.3a aggiunge un prototipo opzionale scritto per ET UX, senza dipendenze
+Ribbon/Nxt: quattro schede **Sketch, Features, Reference e Tools** con le stesse
+24 azioni native della V0.2 e i due comandi informativi. Le QAction sono condivise
+con le toolbar native: icone, traduzioni, abilitazione e dispatch restano FreeCAD.
+Il catalogo V0.2 è invariato. [Studio e scelta](docs/RIBBON_V03A.md).
+
+**Attivazione:** seleziona ET FreeCAD UX e usa `ET UX → Ribbon sperimentale →
+Attiva/disattiva Ribbon sperimentale`. **Disattivazione:** stesso comando oppure
+`Toolbar standard` nell'angolo della Ribbon. La scelta dura soltanto nella sessione
+e parte disattivata al riavvio. Durante il cambio di workbench il prototipo viene
+distrutto e ricreato al ritorno; la UI standard è il fallback in caso di errore.
+Le sole toolbar ET UX vengono compresse temporaneamente, senza cambiarne la
+visibilità memorizzabile; dimensioni, albero, proprietà e task nativi sono preservati.
+Due righe di pulsanti, altezza compatta e scorrimento orizzontale nelle schede
+per finestre strette. Nessuno stylesheet o asset SolidWorks.
+
+**Verifica:** unitari, geometria e GUI offscreen su 1.1.3/Qt6 e 1.0/Qt5;
+risultati e limiti in [VALIDATION_V03A.md](docs/VALIDATION_V03A.md).
+Esperienza grafica interattiva, DPI, temi e coesistenza con addon restano da verificare
+su desktop. Nessuno screenshot è incluso.
 
 Menu `ET UX` con quattro sottomenu e quattro toolbar native:
 
@@ -22,7 +43,7 @@ Non sono richiesti Ribbon, Nxt, pacchetti pip o un binding Qt esterno. ET UX non
 ## Installazione Windows e Linux
 
 1. In FreeCAD apri Visualizza → Pannelli → Console Python ed esegui `print(App.getUserAppDataDir())`. Usa il percorso restituito, poiché varia tra installazioni.
-2. Chiudi FreeCAD. Scarica o clona il branch `feature/mechanical-workspace-v0.2` e colloca la directory completa in `<percorso restituito>/Mod/ET-FreeCAD-UX`. `InitGui.py` deve essere direttamente nella root dell'addon, senza una seconda cartella annidata. Preserva eventuali copie precedenti.
+2. Chiudi FreeCAD. Scarica o clona il branch `feature/ribbon-prototype-v0.3a` e colloca la directory completa in `<percorso restituito>/Mod/ET-FreeCAD-UX`. `InitGui.py` deve essere direttamente nella root dell'addon, senza una seconda cartella annidata. Preserva eventuali copie precedenti.
 3. **Windows:** copia la directory con Esplora file; il percorso è tipicamente sotto `%APPDATA%\FreeCAD`, ma il valore della console è autorevole.
 4. **Linux:** copia la directory oppure crea un collegamento con `ln -s /percorso/checkout "<directory utente>/Mod/ET-FreeCAD-UX"`, dopo aver creato `Mod`. Non sostituire un collegamento già presente senza controllarlo.
 5. Riavvia e seleziona **ET FreeCAD UX** nel selettore delle workbench. Abilita il pannello Report per leggere la guida e le eventuali diagnosi.
@@ -70,4 +91,4 @@ Esiti V0.2 e limiti: [rapporto di verifica](docs/VALIDATION_V02.md). L'offscreen
 
 `core/catalog.py` contiene gruppi immutabili e filtro delle capacità; `adapters/freecad.py` carica i moduli pubblici e registra soltanto i comandi informativi ETUX; `ui/workbench.py` costruisce menu e toolbar una sola volta. `Init.py` non importa la GUI, `InitGui.py` registra la workbench. Nessun riferimento persistente ai documenti, observer o timer.
 
-Vedi [architettura](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [requisiti](docs/REQUIREMENTS.md) e [confronto delle estensioni](docs/EXTENSIONS_COMPARISON.md). Tree, inspector e renderer Ribbon/Nxt non sono duplicati.
+Vedi [architettura](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [requisiti](docs/REQUIREMENTS.md) e [confronto delle estensioni](docs/EXTENSIONS_COMPARISON.md). Tree e inspector restano nativi; il prototipo non replica editor JSON o servizi globali Ribbon/Nxt.

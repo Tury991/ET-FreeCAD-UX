@@ -1,5 +1,11 @@
 # Requisiti e matrice di riferimento
 
+V0.3a: il prototipo usa esclusivamente il facade PySide del runtime host, importato
+su opt-in. Verifiche attuali: 14 unitari, 8 geometrici e smoke Ribbon/V0.2 su
+FreeCAD 1.1.3/Qt6 e 1.0.0/Qt5; dettagli in [VALIDATION_V03A.md](VALIDATION_V03A.md).
+L'addon esterno FreeCAD-Ribbon resta distinto e non eseguito; la tabella storica
+sotto non ne certifica la compatibilità.
+
 Il riferimento principale è **FreeCAD 1.1.3**, fissato esattamente per lo sviluppo V0.2. FreeCAD 1.0 è secondario e resta verificato sulla build disponibile; non deve limitare automaticamente le funzionalità di un addon opzionale Qt6.
 
 | Componente | Requisito | Evidenza / stato |
