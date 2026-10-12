@@ -89,6 +89,6 @@ Esiti V0.2 e limiti: [rapporto di verifica](docs/VALIDATION_V02.md). L'offscreen
 
 ## Architettura e sviluppo
 
-`core/catalog.py` contiene gruppi immutabili e filtro delle capacità; `adapters/freecad.py` carica i moduli pubblici e registra soltanto i comandi informativi ETUX; `ui/workbench.py` costruisce menu e toolbar una sola volta. `Init.py` non importa la GUI, `InitGui.py` registra la workbench. Nessun riferimento persistente ai documenti, observer o timer.
+`core/catalog.py` contiene gruppi immutabili e filtro delle capacità; `adapters/freecad.py` carica i moduli pubblici e registra i comandi informativi; `adapters/ribbon.py` risolve le QAction native e fornisce il toggle ETUX. `ui/workbench.py` costruisce menu e toolbar una sola volta; `ui/ribbon.py` possiede il renderer, un timer di riattivazione cancellabile e il filtro Close, rilasciati su disattivazione. `Init.py` non importa la GUI, `InitGui.py` registra la workbench. Nessun riferimento persistente ai documenti o observer di modello.
 
 Vedi [architettura](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [requisiti](docs/REQUIREMENTS.md) e [confronto delle estensioni](docs/EXTENSIONS_COMPARISON.md). Tree e inspector restano nativi; il prototipo non replica editor JSON o servizi globali Ribbon/Nxt.
