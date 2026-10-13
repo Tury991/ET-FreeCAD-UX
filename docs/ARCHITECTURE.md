@@ -1,5 +1,10 @@
 # Architettura V0.3a — Mechanical Workspace e Ribbon opzionale
 
+La V0.3b mantiene questa architettura runtime e separa deployment/diagnostica
+in strumenti locali: [WINDOWS_TECHNICAL.md](WINDOWS_TECHNICAL.md).
+Manifest di identita, script PowerShell, macro percorso e diagnostica non
+aggiungono dipendenze o preferenze al loader. I comandi e il catalogo restano V0.3a.
+
 ET UX organizza il percorso documento → Body → sketch → feature → modifica usando le azioni native. Il valore aggiunto è l'accesso per attività da una workbench, senza ricreare albero, inspector, solver o task panel. Il [confronto delle estensioni](EXTENSIONS_COMPARISON.md) resta il riferimento per evitare duplicazioni con Nxt/Ribbon.
 
 ## Confini

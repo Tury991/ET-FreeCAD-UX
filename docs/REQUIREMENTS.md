@@ -1,5 +1,14 @@
 # Requisiti e matrice di riferimento
 
+V0.3b: installazione utente Windows 10/11 progettata per Windows PowerShell 5.1
+incluso e FreeCAD 1.1.3, senza Python/Qt separati o amministratore. Script provati
+su Windows Server 2025 CI (5.1 e 7); desktop Windows 10/11 rimane da collaudare.
+Sul cloud Linux la suite conta 19 casi (18 passati e uno skip PowerShell non
+presente), 8 geometrici e smoke/diagnostica reali su 1.1.3 e 1.0.
+Su Windows Server 2025 CI il portable ufficiale 1.1.3 passa anche 19 unitari
+senza skip, 8 geometrici e GUI/Ribbon/diagnostica offscreen con Qt6 incluso. Vedi
+[VALIDATION_V03B.md](VALIDATION_V03B.md) per la matrice completa e i limiti.
+
 V0.3a: il prototipo usa esclusivamente il facade PySide del runtime host, importato
 su opt-in. Verifiche attuali: 14 unitari, 8 geometrici e smoke Ribbon/V0.2 su
 FreeCAD 1.1.3/Qt6 e 1.0.0/Qt5; dettagli in [VALIDATION_V03A.md](VALIDATION_V03A.md).
