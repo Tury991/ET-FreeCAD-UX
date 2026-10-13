@@ -10,7 +10,13 @@ $runtime = [IO.Path]::GetFullPath($RuntimeRoot)
 $python = @(Get-ChildItem -LiteralPath $runtime -Recurse -File -Filter 'python.exe')
 $module = @(Get-ChildItem -LiteralPath $runtime -Recurse -File -Filter 'FreeCAD.pyd')
 $ext = @(Get-ChildItem -LiteralPath $runtime -Recurse -Directory -Filter 'Ext')
+if ($module.Count -eq 1) {
+    # Python ships a second launcher under Lib/venv/scripts/nt; never select it.
+    $python = @($python | Where-Object { $_.DirectoryName -eq $module[0].DirectoryName })
+}
 if ($python.Count -ne 1 -or $module.Count -ne 1 -or $ext.Count -ne 1) {
+    Write-Host ('Runtime layout python=' + ($python.FullName -join ',') +
+                ' module=' + ($module.FullName -join ',') + ' Ext=' + ($ext.FullName -join ','))
     throw 'Runtime portable ambiguo/incompleto: richiesti un python.exe, FreeCAD.pyd ed Ext.'
 }
 $profile = Join-Path ([IO.Path]::GetTempPath()) ('ETUX-host-' + [Guid]::NewGuid().ToString('N'))
