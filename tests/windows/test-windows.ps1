@@ -84,6 +84,32 @@ try {
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $target 'old-only.txt'))) 'Vecchi file mescolati ai nuovi.'
         Assert-True (@(Get-ChildItem -LiteralPath (Join-Path $user 'Mod') -Directory).Count -eq 1) 'Backup caricato come workbench.'
     }
+    Test-Case 'aggiornamento legacy senza marker o file Ribbon' {
+        param($user, $case)
+        Install-Test $user
+        $target = Get-ETUXTarget $user
+        [IO.File]::Delete((Join-Path $target 'etux-package.json'))
+        [IO.File]::Delete((Join-Path $target 'et_freecad_ux/adapters/ribbon.py'))
+        [IO.File]::Delete((Join-Path $target 'et_freecad_ux/ui/ribbon.py'))
+        Assert-ETUXIdentity $target
+        Install-Test $user
+        Assert-ETUXRuntime $target
+        Assert-True (Test-Path -LiteralPath (Join-Path $target 'etux-package.json')) 'Marker nuovo mancante.'
+    }
+    Test-Case 'processo FreeCAD aperto impedisce ogni scrittura' {
+        param($user, $case)
+        if ($env:OS -ne 'Windows_NT') { return } # Windows-specific process guard.
+        function global:Get-Process {
+            [CmdletBinding()]
+            param([string[]]$Name)
+            [pscustomobject]@{ProcessName='FreeCAD'}
+        }
+        try {
+            Expect-Failure { Install-Test $user }
+            Expect-Failure { Uninstall-Test $user }
+            Assert-True (@(Get-ChildItem -LiteralPath $user -Force).Count -eq 0) 'Profilo modificato con FreeCAD aperto.'
+        } finally { Remove-Item Function:\Get-Process }
+    }
     Test-Case 'WhatIf installazione senza alcuna scrittura' {
         param($user, $case)
         & (Join-Path $repo 'install-windows.ps1') -SourceDirectory $fixture -FreeCADUserDir $user -WhatIf
