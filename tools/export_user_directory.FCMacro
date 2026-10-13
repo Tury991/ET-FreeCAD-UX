@@ -1,0 +1,25 @@
+"""Run locally from FreeCAD's Macro menu; this path file is PRIVATE, not a log."""
+import json
+from pathlib import Path
+import FreeCAD as App
+from PySide import QtWidgets
+
+suggested = Path(App.getUserAppDataDir()) / 'freecad-user-path.json'
+if globals().get('__file__'):
+    suggested = Path(__file__).resolve().parents[1] / 'freecad-user-path.json'
+filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+    None, 'Salva il percorso privato accanto a install-windows.ps1',
+    str(suggested), 'JSON (*.json)')
+if filename:
+    try:
+        Path(filename).write_text(json.dumps({
+            'schema': 1, 'application': 'FreeCAD',
+            'freecad_version': '.'.join(App.Version()[:3]),
+            'user_app_data_dir': App.getUserAppDataDir(),
+        }, ensure_ascii=False, indent=2), encoding='utf-8')
+        QtWidgets.QMessageBox.information(None, 'ET UX',
+            'Percorso salvato. Chiudi FreeCAD e avvia install-windows.ps1. '
+            'Questo JSON contiene un percorso personale: non allegarlo ai log.')
+    except OSError:
+        QtWidgets.QMessageBox.warning(None, 'ET UX',
+            'Impossibile salvare: scegli una cartella scrivibile del tuo utente.')

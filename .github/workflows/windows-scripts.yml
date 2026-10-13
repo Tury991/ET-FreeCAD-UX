@@ -1,0 +1,27 @@
+name: Windows local installer
+on:
+  push:
+    branches: [feature/windows-first-v0.3b]
+  pull_request:
+    paths:
+      - '**.ps1'
+      - '**.psm1'
+      - 'etux-package.json'
+      - 'et_freecad_ux/**'
+      - 'tools/**'
+      - 'docs/**'
+      - '.github/workflows/windows-scripts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-install-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Windows PowerShell 5.1 isolated filesystem tests
+        shell: powershell
+        run: ./tests/windows/test-windows.ps1
+      - name: PowerShell 7 isolated filesystem tests
+        shell: pwsh
+        run: ./tests/windows/test-windows.ps1

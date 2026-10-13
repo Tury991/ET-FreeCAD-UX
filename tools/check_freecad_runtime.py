@@ -78,6 +78,11 @@ try:
                 init_globals={"Workbench": Gui.Workbench, "FreeCAD": App,
                               "Gui": Gui, "FreeCADGui": Gui})
     runpy.run_path(smoke, run_name='etux_gui_smoke')
+    diagnostic = runpy.run_path(str(Path(smoke).with_name('diagnose_freecad.py')),
+                               run_name='etux_diagnostic_smoke')
+    report = diagnostic['run']()
+    assert report['status'] == 'pass', report
+    print('ETUX_DIAGNOSTIC_OK', file=sys.__stdout__, flush=True)
     from PySide import QtCore
     print('QT_VERSION=' + QtCore.qVersion(), flush=True)
     try:

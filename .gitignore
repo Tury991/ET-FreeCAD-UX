@@ -6,3 +6,7 @@ htmlcov/
 
 # Task scratch files and runtime logs
 work/
+
+# Private local installation profile; never include it in diagnostics or commits.
+freecad-user-path.json
+etux-diagnostic*.json

@@ -1,0 +1,26 @@
+"""Local diagnostic macro. Does not run model operations or install dependencies."""
+from pathlib import Path
+import runpy
+from PySide import QtWidgets
+
+script = Path(__file__).with_name('diagnose_freecad.py') if globals().get('__file__') else None
+if script is None or not script.is_file():
+    chosen, _ = QtWidgets.QFileDialog.getOpenFileName(
+        None, 'Seleziona tools/diagnose_freecad.py della copia locale', '', 'Python (*.py)')
+    script = Path(chosen) if chosen else None
+if script:
+    try:
+        diagnostic = runpy.run_path(str(script), run_name='etux_diagnostic')
+        report = diagnostic['run']()
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            None, 'Salva solo il rapporto diagnostico anonimo ET UX',
+            'etux-diagnostic.json', 'JSON (*.json)')
+        if filename:
+            diagnostic['save_report'](report, filename)
+        QtWidgets.QMessageBox.information(None, 'ET UX diagnostica',
+            'Esito: ' + report['status'] + '. Se blocked, concludi il task e ripeti. '
+            'Il rapporto non include nomi, percorsi, documenti o cronologia Report.')
+    except Exception:
+        QtWidgets.QMessageBox.warning(None, 'ET UX diagnostica',
+            'Diagnostica non avviata. Verifica che tutti i file locali siano presenti; '
+            'leggi il pannello Report localmente, senza condividerlo integralmente.')
