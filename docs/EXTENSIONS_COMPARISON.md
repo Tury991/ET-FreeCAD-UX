@@ -1,5 +1,9 @@
 # Strategia tecnica pre-V0.2: ET UX, Ribbon e Nxt
 
+Questo confronto conserva la decisione pre-V0.2. La V0.3a introduce, su richiesta,
+un prototipo Qt locale reversibile: [studio aggiornato](RIBBON_V03A.md).
+Non duplica editor Ribbon, tree, inspector o servizi Nxt.
+
 Decisione del **12 ottobre 2026**. FreeCAD **1.1.3** è il riferimento principale verificato nel cloud; **1.0** resta una regressione secondaria per ET UX. Le estensioni opzionali non devono essere abilitate sulla base del solo numero di versione.
 
 ## Confronto architetturale

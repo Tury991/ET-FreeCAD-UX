@@ -27,7 +27,8 @@ class HostWorkbench:
 class WorkbenchTests(unittest.TestCase):
     def test_modules_import_without_host_or_qt(self):
         result = subprocess.run([sys.executable, '-c',
-            'import et_freecad_ux.core.catalog, et_freecad_ux.ui.workbench; '
+            'import et_freecad_ux.core.catalog, et_freecad_ux.ui.workbench, '
+            'et_freecad_ux.ui.ribbon, et_freecad_ux.adapters.ribbon; '
             'import sys; assert not any(n in sys.modules for n in '
             '("FreeCAD", "FreeCADGui", "PySide", "PySide2", "PySide6"))'],
             capture_output=True, text=True)
@@ -47,7 +48,7 @@ class WorkbenchTests(unittest.TestCase):
 
     def test_initialize_and_activation_do_not_duplicate_ui(self):
         gui = Mock()
-        gui.listCommands.return_value = list(NATIVE_COMMANDS) + [ABOUT_COMMAND, HELP_COMMAND]
+        gui.listCommands.return_value = list(NATIVE_COMMANDS) + [ABOUT_COMMAND, HELP_COMMAND, 'ETUX_ToggleRibbon']
         wb = create_workbench_class(HostWorkbench)()
         with patch.dict(sys.modules, {'FreeCAD': Mock(), 'FreeCADGui': gui, 'PartDesignGui': Mock(), 'SketcherGui': Mock()}):
             wb.Initialize()
@@ -56,7 +57,8 @@ class WorkbenchTests(unittest.TestCase):
                 wb.Activated()
                 wb.Deactivated()
         self.assertEqual(wb.toolbars, [("ET UX " + g.label, list(g.commands)) for g in GROUPS])
-        self.assertEqual(wb.menus, [(["ET UX", g.label], list(g.commands)) for g in GROUPS])
+        self.assertEqual(wb.menus, [(["ET UX", g.label], list(g.commands)) for g in GROUPS] +
+                         [(['ET UX', 'Ribbon sperimentale'], ['ETUX_ToggleRibbon'])])
         gui.addCommand.assert_not_called()
         self.assertEqual(wb.GetClassName(), 'Gui::PythonWorkbench')
         self.assertTrue(Path(ICON).is_file())
