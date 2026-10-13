@@ -85,6 +85,15 @@ function Assert-ETUXRuntime([string]$Root) {
     }
 }
 
+function Get-ETUXNormalizedHash([string]$Path) {
+    # Git checkouts on Windows may use CRLF; ZIP copies usually use LF.
+    $text = [IO.File]::ReadAllText($Path, [Text.Encoding]::UTF8).Replace("`r`n", "`n")
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    try {
+        return ([BitConverter]::ToString($algorithm.ComputeHash([Text.Encoding]::UTF8.GetBytes($text)))).Replace('-', '')
+    } finally { $algorithm.Dispose() }
+}
+
 function Assert-ETUXIdentity([string]$Root) {
     $marker = Join-Path $Root 'etux-package.json'
     if (Test-Path -LiteralPath $marker -PathType Leaf) {
@@ -101,8 +110,8 @@ function Assert-ETUXIdentity([string]$Root) {
                 throw ('Installazione legacy incompleta: manca ' + $file)
             }
         }
-        $loader = (Get-FileHash -LiteralPath (Join-Path $Root 'InitGui.py') -Algorithm SHA256).Hash
-        $catalog = (Get-FileHash -LiteralPath (Join-Path $Root 'et_freecad_ux/core/catalog.py') -Algorithm SHA256).Hash
+        $loader = Get-ETUXNormalizedHash (Join-Path $Root 'InitGui.py')
+        $catalog = Get-ETUXNormalizedHash (Join-Path $Root 'et_freecad_ux/core/catalog.py')
         if ($loader -ne 'CF45807F452296AFB3185FB4072D21469D7A1040E041948DAEE936EBCAC1C3CE' -or
             $catalog -notin @('B68D36663554A7150BEE2B670E59966702FCE965AB7D3E043396533BFD6D31E0',
                              '0383F8C087F2967B470F52ABB6B0A8AF64D9D6F67BAA1F1E77FDB10C8889862F')) {
