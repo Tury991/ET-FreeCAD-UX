@@ -186,6 +186,7 @@ finally:
     if 'ETUXWorkbench' in Gui.listWorkbenches():
         etux = Gui.getWorkbench('ETUXWorkbench')
         if getattr(etux, '_etux_initialized', False):
+            print('ETUX_CLEANUP_BEGIN', file=sys.__stdout__, flush=True)
             etux.setRibbonEnabled(False)
             etux.setRibbonDensity(previous_density)
             if previous_density_value:
@@ -196,6 +197,7 @@ finally:
         window.removeToolBar(other)
         other.setParent(None)
         other.deleteLater()
+    print('ETUX_CLEANUP_DOCUMENTS', file=sys.__stdout__, flush=True)
     Gui.Selection.clearSelection()
     if doc and doc.Name in App.listDocuments():
         if Gui.activeDocument() and Gui.activeDocument().getInEdit():
@@ -204,6 +206,7 @@ finally:
         App.closeDocument(doc.Name)
     if previous_doc in App.listDocuments():
         App.setActiveDocument(previous_doc)
+    print('ETUX_CLEANUP_WORKBENCH', file=sys.__stdout__, flush=True)
     Gui.activateWorkbench(previous)
     for document, obj, subelements in previous_selection:
         if document in App.listDocuments() and App.getDocument(document).getObject(obj):
@@ -212,6 +215,9 @@ finally:
                     Gui.Selection.addSelection(document, obj, subelement)
             else:
                 Gui.Selection.addSelection(document, obj)
+    print('ETUX_CLEANUP_DEFERRED', file=sys.__stdout__, flush=True)
     # Drain native views before interpreter shutdown, including on failure.
     QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
     QtWidgets.QApplication.processEvents()
+
+    print('ETUX_CLEANUP_OK', file=sys.__stdout__, flush=True)

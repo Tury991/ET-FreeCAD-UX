@@ -10,6 +10,7 @@ class RibbonController:
         self.bar = None
         self.saved_sizes = []
         self.close_filter = None
+        self.focus_filter = None
         self.activation_timer = None
 
     def schedule(self, callback):
@@ -81,15 +82,17 @@ class RibbonController:
             container.setObjectName('ETUX_RibbonSurface')
             from et_freecad_ux.core.ribbon import ribbon_sections, DENSITIES
             action_map = {command: action for _, actions, _ in resolved for command, action in actions}
-            class RibbonButton(QtWidgets.QToolButton):
-                def focusInEvent(self, event):
-                    super().focusInEvent(event)
-                    parent = self.parentWidget()
-                    while parent is not None and not isinstance(parent, QtWidgets.QScrollArea):
-                        parent = parent.parentWidget()
-                    if parent is not None:
-                        parent.ensureWidgetVisible(self)
+            class FocusFilter(QtCore.QObject):
+                def eventFilter(self, button, event):
+                    if event.type() == QtCore.QEvent.FocusIn:
+                        parent = button.parentWidget()
+                        while parent is not None and not isinstance(parent, QtWidgets.QScrollArea):
+                            parent = parent.parentWidget()
+                        if parent is not None:
+                            parent.ensureWidgetVisible(button)
+                    return False
 
+            self.focus_filter = FocusFilter(container)
             for label, sections in ribbon_sections(action_map):
                 scroll = QtWidgets.QScrollArea(tabs)
                 scroll.setWidgetResizable(True)
@@ -107,7 +110,8 @@ class RibbonController:
                     column = QtWidgets.QVBoxLayout(section)
                     commands = QtWidgets.QGridLayout()
                     for index, (command, action) in enumerate(actions):
-                        button = RibbonButton(section)
+                        button = QtWidgets.QToolButton(section)
+                        button.installEventFilter(self.focus_filter)
                         button.setObjectName('ETUX_Ribbon_' + command)
                         button.setDefaultAction(action)
                         button.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -273,6 +277,17 @@ class RibbonController:
             try:
                 self.gui.getMainWindow().removeEventFilter(close_filter)
                 close_filter.deleteLater()
+            except RuntimeError:
+                pass
+        if self.focus_filter is not None:
+            focus_filter, self.focus_filter = self.focus_filter, None
+            for button, _ in self.buttons:
+                try:
+                    button.removeEventFilter(focus_filter)
+                except RuntimeError:
+                    pass
+            try:
+                focus_filter.deleteLater()
             except RuntimeError:
                 pass
         bar, self.bar = self.bar, None

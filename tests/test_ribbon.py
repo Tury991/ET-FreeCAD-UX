@@ -152,3 +152,18 @@ class ModernRibbonTests(unittest.TestCase):
             wb.setRibbonDensity('compact')
         self.assertFalse(wb._etux_ribbon_enabled)
         wb._etux_ribbon.deactivate.assert_called_once()
+
+    def test_focus_callbacks_are_removed_before_widget_destruction(self):
+        controller = RibbonController(Mock(), (), Mock())
+        button, focus_filter, bar = Mock(), Mock(), Mock()
+        controller.buttons = [(button, True)]
+        controller.focus_filter = focus_filter
+        controller.bar = bar
+        events = []
+        button.removeEventFilter.side_effect = lambda f: events.append('disconnect')
+        bar.deleteLater.side_effect = lambda: events.append('destroy')
+        controller.deactivate()
+        controller.deactivate()
+        self.assertEqual(events, ['disconnect', 'destroy'])
+        focus_filter.deleteLater.assert_called_once()
+        self.assertIsNone(controller.focus_filter)

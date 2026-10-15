@@ -9,9 +9,9 @@ non è disponibile per errore di connessione al proxy; consegna tramite API GitH
 
 | Ambiente | Unitari | Geometria nativa | GUI, diagnostica, cleanup |
 | --- | --- | --- | --- |
-| Python Linux senza FreeCAD/Qt | 25 casi: 24 passati, 1 skip PowerShell assente | Non applicabile | Import e failure path senza host/Qt |
-| FreeCAD 1.1.3 ufficiale, Python 3.11.14, Qt6 6.8.3 | 24 passati, 1 skip | 8 passati | Passati a devicePixelRatio 1.0, 1.25, 1.5 |
-| FreeCAD 1.0.0 Debian, Python 3.13.5, Qt5 5.15.15 | 24 passati, 1 skip | 8 passati | Passati a devicePixelRatio 1.0 |
+| Python Linux senza FreeCAD/Qt | 26 casi: 25 passati, 1 skip PowerShell assente | Non applicabile | Import e failure path senza host/Qt |
+| FreeCAD 1.1.3 ufficiale, Python 3.11.14, Qt6 6.8.3 | 25 passati, 1 skip | 8 passati | Passati a devicePixelRatio 1.0, 1.25, 1.5 |
+| FreeCAD 1.0.0 Debian, Python 3.13.5, Qt5 5.15.15 | 25 passati, 1 skip | 8 passati | Passati a devicePixelRatio 1.0 |
 
 Ogni avvio host usa profili XDG temporanei e il runner con controllo esatto di
 versione. I tre avvii 1.1.3 usano `QT_SCALE_FACTOR=1`, `1.25`, `1.5`. Il layout
@@ -69,8 +69,8 @@ ETUX_RIBBON_SMOKE_OK toggles=5 switches=5 native_actions=26
 ETUX_GUI_SMOKE_OK native_commands=24 groups=4 body=True sketch_dispatch=True pad_dispatch=True
 ETUX_DIAGNOSTIC_OK
 ETUX_RIBBON_CLOSE_OK
-ETUX_RUNTIME_TESTS_OK version=1.1.3 unit=25 geometry=8 gui=True
-ETUX_RUNTIME_TESTS_OK version=1.0.0 unit=25 geometry=8 gui=True
+ETUX_RUNTIME_TESTS_OK version=1.1.3 unit=26 geometry=8 gui=True
+ETUX_RUNTIME_TESTS_OK version=1.0.0 unit=26 geometry=8 gui=True
 ```
 
 Gli altri avvii riportano `dpr=1.25` e `dpr=1.5`. `git diff --check` passa.
@@ -108,3 +108,14 @@ AttachmentEditor` da un loader host: non è un fallimento degli assert ET UX,
 ma il dispatch dei task di attachment/Reference non è stato certificato in
 questo avvio. Le azioni Reference sono conservate e raggiungibili; provarne i
 task sul desktop con installazione completa resta parte del collaudo manuale.
+
+## Verifica CI Windows della PR #8
+
+Il primo avvio CI ha superato **18 prove installer su PowerShell 5.1 e 18 su
+PowerShell 7**, inclusi i due nuovi casi upgrade/incompletezza. FreeCAD Windows
+ha superato i 384 casi layout e gli smoke Ribbon/CAD, poi è terminato in modo
+anomalo durante la fase successiva allo smoke. Tale avvio GUI è **fallito**,
+non certificato. Per isolare il cleanup sono stati aggiunti marcatori e tracing
+nel solo runner. Il focus ora usa un filtro Qt posseduto, rimosso da tutti i
+pulsanti prima della distruzione: nessun override Python di QToolButton.
+La PR riporta lo stato aggiornato delle esecuzioni successive.

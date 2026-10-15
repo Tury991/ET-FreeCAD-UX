@@ -52,13 +52,13 @@ hover e contorno focus. Stati disabilitati usano la palette nativa. Nessuna
 scrittura di stile sulla main window, viewport, albero o pannelli Task.
 
 In caso di overflow ogni scheda ha scorrimento orizzontale, senza riordinare o
-eliminare comandi. Qt porta nel viewport i controlli raggiunti con Tab; le frecce
+eliminare comandi. un filtro di focus locale porta nel viewport i controlli raggiunti con Tab; le frecce
 muovono le schede e il menu Ribbon offre le densità e il ritorno standard.
 Il menu ET UX resta un accesso completo. Altezza calcolata sui contenuti, non
 fissata. La verifica dei temi desktop e del contrasto delle icone native resta
 necessaria: ET UX non sostituisce le risorse dell'host.
 
-Su disattivazione vengono cancellati timer, filtro e riferimenti a widget/menu;
+Su disattivazione vengono cancellati timer, filtri finestra/focus e riferimenti a widget/menu;
 la toolbar ET UX viene rimossa e distrutta con `deleteLater`. Cleanup idempotente.
 I limiti min/max delle sole toolbar ET UX vengono ripristinati, senza scriverne
 la visibilità né toccare quelle di altre workbench. La densità può cambiare anche
