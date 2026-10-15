@@ -1,4 +1,4 @@
-# Windows 10/11 — installare e provare ET FreeCAD UX V0.3b
+# Windows 10/11 — installare e provare ET FreeCAD UX V0.4b
 
 Serve FreeCAD **1.1.3** gia installato. Non servono Python separato, Qt, pip, Git
 o privilegi amministrativi per la workbench. La Ribbon resta sperimentale.
@@ -7,7 +7,7 @@ esiti della procedura qui sotto sulla tua macchina.
 
 ## Installazione dalla copia scaricata
 
-1. Scarica lo ZIP del branch `feature/windows-first-v0.3b` dalla pagina GitHub
+1. Scarica lo ZIP del branch `feat/v04b-modern-ribbon` dalla pagina GitHub
    del progetto (Code → Download ZIP) ed estrailo con Esplora file. Non eseguire
    comandi che scaricano ed eseguono script dalla rete. Apri la cartella che contiene
    **InitGui.py, install-windows.ps1, uninstall-windows.ps1 ed etux-package.json**.
@@ -52,8 +52,12 @@ Per un'anteprima senza scritture aggiungi `-WhatIf` al comando. Non usare
 
 Seleziona **ET FreeCAD UX**, poi **ET UX → Ribbon sperimentale →
 Attiva/disattiva Ribbon sperimentale**. Devono comparire quattro schede:
-**Sketch, Features, Reference, Tools**. Albero delle feature, proprieta e task
-rimangono quelli di FreeCAD. Il pulsante **Toolbar standard** disattiva la Ribbon.
+**Features, Sketch, Reference, Tools**. Albero delle feature, proprieta e task
+rimangono quelli di FreeCAD. Apri il menu **Ribbon** in alto a destra e scegli
+**Classic Modern** (predefinita) o **Compact Modern**; trovi le stesse scelte in
+**ET UX → Ribbon sperimentale** anche quando la fascia è spenta. La densità viene
+ricordata nel solo profilo ET UX e cambia subito, anche con un task aperto.
+**Ribbon → Toolbar standard** disattiva la fascia.
 All'avvio successivo il default e standard; l'opt-in dura soltanto nella sessione.
 
 Se un comando e grigio, verifica i prerequisiti nativi: documento, Body attivo,
@@ -90,15 +94,23 @@ Usa un documento di prova nuovo, non un modello di lavoro.
 9. Salva un **FCStd**, chiudi il documento e riaprilo con File → Apri. Verifica
    albero, Body, sketch/vincoli e Pad/Pocket/Fillet/Chamfer creati. Modifica una
    quota, ricalcola e prova Undo/Redo. Non includere questo file nei log diagnostici.
-10. Premi **Toolbar standard** o usa di nuovo il toggle. Verifica menu e toolbar
+10. Scegli **Ribbon → Toolbar standard** o usa di nuovo il toggle. Verifica menu e toolbar
     V0.2, albero e proprieta. Chiudi e riapri FreeCAD: deve partire con UI standard.
 
 Annota separatamente eventuali problemi di finestra stretta, tema scuro/chiaro,
-scala Windows 100/150/200%, navigazione tastiera, task, salvataggio e riapertura.
+scala Windows 100/125/150% e risoluzioni 1920×1080, 1600×900, 1366×768, navigazione tastiera, task, salvataggio e riapertura.
 L'offscreen Linux non sostituisce queste osservazioni.
 
-## Aggiornare e tornare alla versione precedente
+Ripeti il percorso in entrambe le densità, con tema chiaro e scuro. Verifica
+leggibilità, focus con Tab, frecce tra le schede, menu Ribbon da tastiera,
+scorrimento orizzontale e accesso all'ultimo comando anche con finestra stretta.
+Chiudi e riapri: la densità scelta deve essere conservata; la Ribbon parte spenta.
+Le immagini V0.4b sono catture Linux **offscreen**, non prove Windows interattive.
 
+## Aggiornare V0.3b e tornare alla versione precedente
+
+Per aggiornare V0.3b a V0.4b usa l'installer della **nuova** copia: riconosce
+il marker `etux-package.json` V0.3b e conserva l'installazione precedente nel backup.
 Estrai la nuova copia in una **cartella separata**, riesegui la macro percorso
 se necessario, chiudi FreeCAD e ripeti il comando di installazione dalla nuova
 cartella. La vecchia installazione viene spostata integralmente in

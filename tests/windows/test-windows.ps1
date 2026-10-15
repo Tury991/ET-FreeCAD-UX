@@ -157,6 +157,30 @@ try {
         Expect-Failure { Get-ETUXUserDirectory '' $bad }
         Expect-Failure { Get-ETUXUserDirectory $user $bad }
     }
+    Test-Case 'upgrade marker V0.3b senza nuova mappa Ribbon, con backup' {
+        param($user, $case)
+        Install-Test $user
+        $target = Get-ETUXTarget $user
+        $marker = Join-Path $target 'etux-package.json'
+        @{schema=1; package_id='Tury991/ET-FreeCAD-UX'; version='0.3.0b1'} |
+            ConvertTo-Json | Set-Content -LiteralPath $marker -Encoding UTF8
+        Remove-Item -LiteralPath (Join-Path $target 'et_freecad_ux/core/ribbon.py')
+        Install-Test $user
+        Assert-True (Test-Path -LiteralPath (Join-Path $target 'et_freecad_ux/core/ribbon.py')) 'Nuova mappa non installata.'
+        $backup = @(Get-ChildItem -LiteralPath (Join-Path $user 'ETUX-Backups') -Directory)[0]
+        $old = Get-Content -LiteralPath (Join-Path $backup.FullName 'etux-package.json') -Raw | ConvertFrom-Json
+        Assert-True ($old.version -eq '0.3.0b1') 'Backup V0.3b non conservato.'
+    }
+    Test-Case 'nuova sorgente senza mappa Ribbon rifiutata prima del backup' {
+        param($user, $case)
+        Install-Test $user
+        $incomplete = Join-Path $case 'incomplete'
+        Copy-Item -LiteralPath $fixture -Destination $incomplete -Recurse
+        Remove-Item -LiteralPath (Join-Path $incomplete 'et_freecad_ux/core/ribbon.py')
+        Expect-Failure { Install-Test $user $incomplete }
+        Assert-ETUXIdentity (Get-ETUXTarget $user)
+        Assert-True (@(Get-ChildItem -LiteralPath (Join-Path $user 'ETUX-Backups') -Directory).Count -eq 0) 'Backup creato per sorgente incompleta.'
+    }
     Test-Case 'errore prima della sostituzione conserva versione precedente' {
         param($user, $case)
         Install-Test $user

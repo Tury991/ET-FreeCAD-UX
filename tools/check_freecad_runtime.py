@@ -53,7 +53,9 @@ def main():
         bootstrap = "lib_dir, ext_dir, smoke, expected = {!r}\n".format(
             (args.lib_dir, args.ext_dir, str(root / "tools" / "smoke_freecad.py"),
              args.expect_version)) + '''
-import runpy, sys, traceback
+import runpy, sys, traceback, faulthandler
+faulthandler.enable(file=sys.__stderr__)
+sys.excepthook = lambda kind, value, tb: traceback.print_exception(kind, value, tb, file=sys.__stderr__)
 sys.path[:0] = [lib_dir, ext_dir]
 # The host must not try to open Python's stdin marker as a CAD document.
 sys.argv = ['FreeCAD']

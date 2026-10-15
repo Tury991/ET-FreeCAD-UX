@@ -10,6 +10,7 @@ import FreeCAD as App
 import FreeCADGui as Gui
 from PySide import QtWidgets, QtCore
 from et_freecad_ux.core.catalog import GROUPS, NATIVE_COMMANDS
+from et_freecad_ux.core.ribbon import SECTIONS
 
 Gui.showMainWindow()
 if Gui.Control.activeDialog():
@@ -20,6 +21,10 @@ previous = Gui.activeWorkbench().name()
 previous_doc = App.ActiveDocument.Name if App.ActiveDocument else None
 doc = None
 other = None
+from et_freecad_ux.adapters.ribbon import PREFERENCE_PATH, read_density
+density_params = App.ParamGet(PREFERENCE_PATH)
+previous_density_value = density_params.GetString('RibbonDensity', '')
+previous_density = read_density(App)
 try:
     if 'ETUXWorkbench' not in Gui.listWorkbenches():
         runpy.run_path(str(ROOT / 'InitGui.py'), init_globals={'Workbench': Gui.Workbench})
@@ -63,7 +68,7 @@ try:
         wb.setRibbonEnabled(True)
         assert len(window.findChildren(QtWidgets.QToolBar, 'ETUX_RibbonPrototype')) == 1
         tabs = ribbon.findChild(QtWidgets.QTabWidget, 'ETUX_RibbonTabs')
-        assert [tabs.tabText(i) for i in range(tabs.count())] == [g.label for g in GROUPS]
+        assert [tabs.tabText(i) for i in range(tabs.count())] == [label for label, _ in SECTIONS]
         for command, action in native_actions.items():
             current = ribbon.findChild(QtWidgets.QToolButton, 'ETUX_Ribbon_' + command).defaultAction()
             assert current == action, (command, current.objectName(), action.objectName(), current.text(), action.text())
@@ -75,6 +80,8 @@ try:
         Gui.runCommand('ETUX_ToggleRibbon', 0)
         drain()
         assert not window.findChildren(QtWidgets.QToolBar, 'ETUX_RibbonPrototype')
+        assert wb._etux_ribbon.buttons == [] and wb._etux_ribbon.pages == []
+        assert wb._etux_ribbon.mode_actions == [] and wb._etux_ribbon.container is None
         assert [not b.isHidden() for b in native_bars] == original_visibility, ([not b.isHidden() for b in native_bars], original_visibility)
         assert [(b.minimumSize(), b.maximumSize()) for b in native_bars] == original_sizes
     native_bars[-1].show()
@@ -102,7 +109,7 @@ try:
     Gui.updateGui()
     Gui.Command.update()
     tabs = wb._etux_ribbon.bar.findChild(QtWidgets.QTabWidget, 'ETUX_RibbonTabs')
-    tabs.setCurrentIndex(1)
+    tabs.setCurrentIndex(0)
     button = wb._etux_ribbon.bar.findChild(QtWidgets.QToolButton, 'ETUX_Ribbon_PartDesign_Body')
     # FreeCAD updates native QAction enablement on its command timer.
     # Give the real event loop a bounded turn; do not setEnabled in the product.
@@ -112,6 +119,7 @@ try:
     assert button.isEnabled()
     wb._etux_ribbon.bar.findChild(QtWidgets.QToolButton, 'ETUX_Ribbon_PartDesign_Body').click()
     assert ribbon_doc.getObject('Body') is not None
+    runpy.run_path(str(ROOT / 'tools' / 'smoke_ribbon_layout.py'))['run'](wb, Gui)
     App.closeDocument(ribbon_doc.Name)
     doc = None
     wb.setRibbonEnabled(False)
@@ -157,6 +165,11 @@ try:
     assert Gui.Command.get('PartDesign_Pad').isActive()
     Gui.runCommand('PartDesign_Pad', 0)
     pad = doc.getObject('Pad')
+    task_before = Gui.Control.activeDialog()
+    for mode in ('compact', 'classic') * 3:
+        wb.setRibbonDensity(mode)
+        assert Gui.Control.activeDialog() == task_before
+        assert doc.getObject('Pad') == pad
     assert pad and pad.Profile[0] == sketch
     assert Gui.activeDocument().getInEdit() is not None
     doc.recompute()
@@ -173,11 +186,18 @@ finally:
     if 'ETUXWorkbench' in Gui.listWorkbenches():
         etux = Gui.getWorkbench('ETUXWorkbench')
         if getattr(etux, '_etux_initialized', False):
+            print('ETUX_CLEANUP_BEGIN', file=sys.__stdout__, flush=True)
             etux.setRibbonEnabled(False)
+            etux.setRibbonDensity(previous_density)
+            if previous_density_value:
+                density_params.SetString('RibbonDensity', previous_density_value)
+            else:
+                density_params.RemString('RibbonDensity')
     if other is not None:
         window.removeToolBar(other)
         other.setParent(None)
         other.deleteLater()
+    print('ETUX_CLEANUP_DOCUMENTS', file=sys.__stdout__, flush=True)
     Gui.Selection.clearSelection()
     if doc and doc.Name in App.listDocuments():
         if Gui.activeDocument() and Gui.activeDocument().getInEdit():
@@ -186,6 +206,7 @@ finally:
         App.closeDocument(doc.Name)
     if previous_doc in App.listDocuments():
         App.setActiveDocument(previous_doc)
+    print('ETUX_CLEANUP_WORKBENCH', file=sys.__stdout__, flush=True)
     Gui.activateWorkbench(previous)
     for document, obj, subelements in previous_selection:
         if document in App.listDocuments() and App.getDocument(document).getObject(obj):
@@ -194,6 +215,9 @@ finally:
                     Gui.Selection.addSelection(document, obj, subelement)
             else:
                 Gui.Selection.addSelection(document, obj)
+    print('ETUX_CLEANUP_DEFERRED', file=sys.__stdout__, flush=True)
     # Drain native views before interpreter shutdown, including on failure.
     QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
     QtWidgets.QApplication.processEvents()
+
+    print('ETUX_CLEANUP_OK', file=sys.__stdout__, flush=True)

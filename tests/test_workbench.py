@@ -48,7 +48,7 @@ class WorkbenchTests(unittest.TestCase):
 
     def test_initialize_and_activation_do_not_duplicate_ui(self):
         gui = Mock()
-        gui.listCommands.return_value = list(NATIVE_COMMANDS) + [ABOUT_COMMAND, HELP_COMMAND, 'ETUX_ToggleRibbon']
+        gui.listCommands.return_value = list(NATIVE_COMMANDS) + [ABOUT_COMMAND, HELP_COMMAND, 'ETUX_ToggleRibbon', 'ETUX_Ribbon_classic', 'ETUX_Ribbon_compact']
         wb = create_workbench_class(HostWorkbench)()
         with patch.dict(sys.modules, {'FreeCAD': Mock(), 'FreeCADGui': gui, 'PartDesignGui': Mock(), 'SketcherGui': Mock()}):
             wb.Initialize()
@@ -58,7 +58,7 @@ class WorkbenchTests(unittest.TestCase):
                 wb.Deactivated()
         self.assertEqual(wb.toolbars, [("ET UX " + g.label, list(g.commands)) for g in GROUPS])
         self.assertEqual(wb.menus, [(["ET UX", g.label], list(g.commands)) for g in GROUPS] +
-                         [(['ET UX', 'Ribbon sperimentale'], ['ETUX_ToggleRibbon'])])
+                         [(['ET UX', 'Ribbon sperimentale'], ['ETUX_ToggleRibbon', 'ETUX_Ribbon_classic', 'ETUX_Ribbon_compact'])])
         gui.addCommand.assert_not_called()
         self.assertEqual(wb.GetClassName(), 'Gui::PythonWorkbench')
         self.assertTrue(Path(ICON).is_file())

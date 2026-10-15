@@ -139,9 +139,10 @@ function Assert-ETUXSource([string]$Root, [string]$Target) {
     Assert-ETUXIdentity $Root
     foreach ($file in @('etux-package.json', 'install-windows.ps1', 'uninstall-windows.ps1',
                        'tools/windows/ETUX.Windows.psm1', 'tools/diagnose_freecad.py',
-                       'tools/export_user_directory.FCMacro', 'docs/WINDOWS_GUIDE.md')) {
+                       'tools/export_user_directory.FCMacro', 'docs/WINDOWS_GUIDE.md',
+                       'et_freecad_ux/core/ribbon.py')) {
         if (-not (Test-Path -LiteralPath (Join-Path $Root $file) -PathType Leaf)) {
-            throw ('Copia V0.3b incompleta: manca ' + $file)
+            throw ('Copia ET UX incompleta: manca ' + $file)
         }
     }
     $separator = [IO.Path]::DirectorySeparatorChar
