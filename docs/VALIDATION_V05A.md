@@ -1,0 +1,110 @@
+# Verifica V0.5a — 15 ottobre 2026
+
+Base `main` V0.4b **ff2217a0e37cac6aa084ddbe6b5fa6033ebf21fe**,
+verificata tramite connettore GitHub. Il checkout iniziale era V0.4a e il proxy
+Git HTTPS non rispondeva: i file aggiornati sono stati recuperati via API,
+verificando tutti gli hash blob, il tree `3ca973580a38489572c6fdb503620ff98a5aeff9`
+e il commit firmato prima di creare il branch dedicato. Nessuna modifica installer.
+
+## Prove eseguite
+
+| Ambiente | Unitari | Geometria nativa | GUI offscreen |
+| --- | --- | --- | --- |
+| FreeCAD 1.1.3 ufficiale Linux, Python 3.11.14, Qt6 6.8.3 | 36 casi, 35 passati, 1 skip PowerShell assente | 8 passati | Layout, Sketch Ribbon, dispatch, diagnostica e chiusura passati |
+| FreeCAD 1.0.0 Debian, Python 3.13.5, Qt5 5.15.15 | 36 casi, 35 passati, 1 skip PowerShell assente | 8 passati | Stesse verifiche passate; limite AttachmentEditor indicato sotto |
+
+Entrambe le esecuzioni usano profili XDG temporanei, controllo esatto di versione,
+processi distinti per fake e GUI nativa, namespace `__main__` host preservato.
+Exit code 0. Nessun pacchetto Qt pip installato nell'host.
+
+Per ciascun runtime:
+
+- Registro reale: tutti i **41 ID nativi** presenti; **43 azioni** native/informative
+  disponibili una sola volta nella mappa condivisa Classic/Compact.
+- Suite V0.4b conservata: 384 casi di layout su due palette sintetiche, tre
+  scale font, quattro passaggi densità e quattro dimensioni, a DPR 1.0;
+  azioni condivise, tooltip/stato/focus, overflow, cleanup e fallback.
+- Quattro percorsi sketch: Classic/Compact × palette chiara/scura; creazione
+  nativa da piano XY attraverso QAction della Ribbon, modifica esistente,
+  chiusura e ritorno nativo a ET UX con ripristino della scheda Features.
+- Stessa Ribbon, stessi pulsanti/QAction e stesso task durante editing e cambi
+  densità; strumenti di geometria attivi, stato di ogni pulsante uguale all'azione.
+- Dispatch reale del vincolo orizzontale dalla Ribbon su una linea selezionata,
+  Undo/Redo del vincolo nativo e di una geometria di setup; task non sostituito.
+- Cambio volontario a PartDesign durante sketch: rimozione Ribbon e observer,
+  timer cancellato, task ancora aperto, nessun ritorno ET UX imposto alla chiusura.
+- Cambio manuale a Sketcher senza editing: cleanup, nessuna riapparizione per
+  uno sketch aperto successivamente; ritorno esplicito a ET UX durante editing.
+- Disattivazione Ribbon durante sketch e chiusura tramite il **vero pulsante
+  Close del task Qt**, che esegue `TaskDlgEditSketch::reject`; nessuna riapparizione.
+  Questo non simula il disegno col mouse o Escape e non dimostra rollback globale.
+- Cambio documento durante editing, chiusura del documento in modifica,
+  nessun nome di sketch o timer obsoleto dopo teardown; cinque toggle e cinque
+  cambi workbench nella suite preesistente, nessun duplicato di toolbar/dock.
+- Unitari nuovi: transizione confermata/non confermata, scelta volontaria,
+  cambio documento, restore della scheda, ingresso con editor già aperto,
+  cleanup idempotente e rimozione observer dopo errore parziale di registrazione.
+
+## Comandi riproducibili
+
+```sh
+python3 -m unittest discover -s tests -v
+bash tools/test_freecad113.sh
+```
+
+Per le catture reali della sola Ribbon:
+
+```sh
+ETUX_SCREENSHOT_DIR=/percorso/temporaneo bash tools/test_freecad113.sh
+```
+
+Regressione 1.0:
+
+```sh
+profile_dir=$(mktemp -d /tmp/etux-v05a-10.XXXXXX)
+trap 'rm -rf "$profile_dir"' EXIT
+XDG_CACHE_HOME="$profile_dir/cache" XDG_CONFIG_HOME="$profile_dir/config" \
+XDG_DATA_HOME="$profile_dir/data" /usr/bin/python3 tools/check_freecad_runtime.py \
+  --expect-version 1.0.0 --lib-dir /usr/lib/freecad-python3/lib \
+  --ext-dir /usr/share/freecad/Ext
+```
+
+Marcatori osservati:
+
+```text
+ETUX_MODERN_LAYOUT_OK cases=384 themes=2 font_scales=3 dpr=1.0
+ETUX_SKETCH_RIBBON_OK cases=4 native_commands=41 undo_redo=True
+ETUX_RIBBON_SMOKE_OK toggles=5 switches=5 native_actions=43
+ETUX_DIAGNOSTIC_OK
+ETUX_RIBBON_CLOSE_OK
+ETUX_RUNTIME_TESTS_OK version=1.1.3 unit=36 geometry=8 gui=True
+ETUX_RUNTIME_TESTS_OK version=1.0.0 unit=36 geometry=8 gui=True
+```
+
+## Risultati, correzioni e limiti
+
+La prima prova della continuità ha fallito: il segnale `workbenchActivated`
+arriva prima dell'hook `Deactivated`, quando ancora non c'è `getInEdit`.
+L'adapter ora identifica la transizione dal nome precedente nel segnale e
+attende l'evento InEdit nativo prima della verifica differita. Le prove fallite
+non sono contate come successi. I test attendono un turno **limitato** del timer
+comandi host per controllare l'abilitazione; il prodotto non forza gli stati.
+
+Le prime catture hanno inoltre mostrato la fascia stretta accanto alle toolbar
+Sketcher: la versione finale inserisce la sola Ribbon su una propria riga e
+rimuove la separazione durante il cleanup. Le [catture](screenshots/v0.5a/README.md)
+sono widget reali offscreen 1.1.3, con palette sintetiche, non mockup o desktop.
+
+Il runtime Debian 1.0 emette il precedente `ModuleNotFoundError: AttachmentEditor`
+nel bootstrap minimale e avvisi di icone/loader; gli assert ET UX e l'exit code
+passano. Non certifica i task Reference/attachment su tale bootstrap. Avvisi
+OpenGL, `propagateSizeHints` e `QThreadStorage` sono presenti nell'offscreen:
+nessuna validazione del viewport 3D o dell'interazione CAD col mouse.
+
+**Non eseguiti:** Windows interattivo, aggiornamento reale Windows dalla V0.4b,
+Escape/disegno col mouse, geometria finale di tutte le nuove feature/vincoli,
+temi host completi, DPI fisici/multi monitor, screen reader e coesistenza Nxt/Ribbon.
+La CI Windows della nuova PR non è inclusa in questi risultati locali.
+La presenza degli ID non garantisce una feature valida per ogni selezione.
+Il task Sketcher espone Close, non un pulsante Cancel con rollback globale.
+Il [collaudo manuale](RIBBON_V05A.md#checklist-manuale-windows-1011) copre i gate aperti.

@@ -120,6 +120,7 @@ try:
     wb._etux_ribbon.bar.findChild(QtWidgets.QToolButton, 'ETUX_Ribbon_PartDesign_Body').click()
     assert ribbon_doc.getObject('Body') is not None
     runpy.run_path(str(ROOT / 'tools' / 'smoke_ribbon_layout.py'))['run'](wb, Gui)
+    runpy.run_path(str(ROOT / 'tools' / 'smoke_sketch_ribbon.py'))['run'](wb, Gui, App)
     App.closeDocument(ribbon_doc.Name)
     doc = None
     wb.setRibbonEnabled(False)
@@ -139,7 +140,7 @@ try:
     other.setParent(None)
     other.deleteLater()
     other = None
-    print('ETUX_RIBBON_SMOKE_OK toggles=5 switches=5 native_actions=26', file=sys.__stdout__, flush=True)
+    print('ETUX_RIBBON_SMOKE_OK toggles=5 switches=5 native_actions={}'.format(sum(len(g.commands) for g in GROUPS)), file=sys.__stdout__, flush=True)
     doc = App.newDocument('ETUXMechanicalGuiSmoke')
     Gui.runCommand('PartDesign_Body', 0)
     body = doc.getObject('Body')

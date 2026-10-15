@@ -54,7 +54,7 @@ def create_workbench_class(base):
 
         def Deactivated(self):
             if self._etux_ribbon is not None:
-                self._etux_ribbon.deactivate()
+                self._etux_ribbon.workbench_departed()
 
         def setRibbonEnabled(self, enabled):
             import FreeCAD as App

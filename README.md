@@ -1,4 +1,4 @@
-# ET-FreeCAD-UX — V0.4b Classic & Compact Modern Ribbon
+# ET-FreeCAD-UX — V0.5a Mechanical Workflow & Integrated Sketch Ribbon
 
 Workbench Python per FreeCAD **1.1.3**, con organizzazione originale dei comandi ispirata al workflow dei CAD parametrici professionali. Riusa Part Design e Sketcher; modello, solver, albero delle feature, proprietà, task panel e Undo/Redo restano nativi. Nessun codice o asset proprietario SolidWorks è copiato. Il progetto non è affiliato a SolidWorks o Dassault Systèmes.
 
@@ -9,7 +9,7 @@ Segui la [guida Windows 10/11](docs/WINDOWS_GUIDE.md) per installare e collaudar
 Body, sketch, Pad e altre feature. [Architettura Windows](docs/WINDOWS_TECHNICAL.md)
 e [risultati effettivi](docs/VALIDATION_V03B.md) distinguono CI/offscreen e desktop.
 
-## Ribbon V0.4b — Classic e Compact Modern
+## Ribbon V0.5a — Classic e Compact Modern
 
 Ribbon opzionale con schede **Features, Sketch, Reference, Tools**, gruppi
 etichettati e separati, azioni native condivise e due densità dello stesso layout.
@@ -26,26 +26,31 @@ la sola densità viene ricordata tra riavvii nel namespace ET UX.
 
 **Interfaccia standard:** `Ribbon → Toolbar standard` oppure lo stesso toggle.
 L'attivazione resta una scelta di sessione: al riavvio FreeCAD parte con le
-normali toolbar. Durante il cambio di workbench i widget ET UX vengono rimossi
-e ricreati al ritorno. Un errore Qt ripristina le toolbar native. Tema, viewport,
+normali toolbar. Durante apertura/modifica sketch da ET UX la fascia resta visibile
+in Sketcher e seleziona Sketch; alla chiusura ripristina la scheda precedente.
+Un cambio volontario di workbench rimuove la fascia; un ritorno esplicito a ET UX
+può ricrearla. Un errore Qt ripristina le toolbar native. Tema, viewport,
 albero e task restano gestiti da FreeCAD; palette e font sono applicati solo
 ai widget della Ribbon, con stylesheet locale e focus visibile.
 
-Tutte le 24 azioni native e le due informative rimangono disponibili.
-Il passaggio nativo a Sketcher e il ritorno automatico a ET UX quando si chiude
-lo sketch restano invariati. Nessun nuovo strumento CAD o dipendenza.
-Dettagli, differenze dai concept e prove: [Ribbon V0.4b](docs/RIBBON_V04B.md).
+Disponibili **41 azioni native e due informative**, conservando tutte quelle
+V0.4b. Aggiunti strumenti Sketcher, vincoli, Hole, Mirror, serie e pipe native.
+Il passaggio a Sketcher e il ritorno restano gestiti da FreeCAD: nessun cambio
+di workbench imposto, task sostitutivo o algoritmo geometrico ET UX.
+[Matrice comandi e studio](docs/COMMAND_MATRIX_V05A.md),
+[utilizzo, aggiornamento Windows e checklist](docs/RIBBON_V05A.md),
+[risultati e limiti](docs/VALIDATION_V05A.md). La correzione installer #9 è esclusa.
 
 Menu `ET UX` con quattro sottomenu e quattro toolbar native:
 
 | Gruppo | Azioni |
 | --- | --- |
-| Sketch | Nuovo sketch nel Body, modifica/chiusura sketch, rettangolo, cerchio, distanza, raggio |
-| Features | Body, Pad, Pocket, Fillet, Chamfer, Revolution |
+| Sketch | Nuovo/modifica/chiudi, linea, cerchio, rettangolo, arco, raccordo, trim, sei vincoli geometrici, distanza, raggio, diametro |
+| Features | Body, Pad, Pocket, Fillet, Chamfer, Revolution, Hole, Mirrored, serie lineare/polare, pipe additiva/sottrattiva |
 | Reference | Piano, linea, punto, sistema di coordinate, SubShapeBinder |
 | Tools | Nuovo documento, salva, Undo/Redo, ricalcolo, preferenze native, guida e informazioni |
 
-I pulsanti riusano direttamente gli ID registrati da FreeCAD: icone, traduzioni, abilitazione contestuale, selezione e gestione del Body sono quelle native. Non viene imposto un Body né cambiata automaticamente la workbench. La modifica dello sketch può attivare Sketcher secondo il comportamento nativo; al termine torna a ET FreeCAD UX se necessario.
+I pulsanti riusano direttamente gli ID registrati da FreeCAD: icone, traduzioni, abilitazione contestuale, selezione e gestione del Body sono quelle native. Non viene imposto un Body né cambiata automaticamente la workbench. La modifica dello sketch può attivare Sketcher secondo il comportamento nativo; la Ribbon resta disponibile durante questa transizione confermata.
 
 All'inizializzazione vengono caricati solo `PartDesignGui` e `SketcherGui` e controllato `Gui.listCommands()`. Un comando assente viene omesso con un messaggio nel pannello Report; `Tools → Guida Mechanical Workspace` elenca nuovamente le capacità mancanti e spiega i prerequisiti. Non si inventano alias per versioni non verificate. Errori geometrici e selezioni non valide usano i messaggi e i task nativi di FreeCAD.
 
@@ -137,6 +142,6 @@ Dettagli e CI verificabile in [VALIDATION_V03B.md](docs/VALIDATION_V03B.md).
 
 ## Architettura e sviluppo
 
-`core/catalog.py` contiene gruppi immutabili e filtro delle capacità; `adapters/freecad.py` carica i moduli pubblici e registra i comandi informativi; `adapters/ribbon.py` risolve le QAction native e fornisce il toggle ETUX. `ui/workbench.py` costruisce menu e toolbar una sola volta; `ui/ribbon.py` possiede il renderer, un timer di riattivazione cancellabile e il filtro Close, rilasciati su disattivazione. `Init.py` non importa la GUI, `InitGui.py` registra la workbench. Nessun riferimento persistente ai documenti o observer di modello.
+`core/catalog.py` contiene gruppi immutabili e filtro delle capacità; `adapters/freecad.py` carica i moduli pubblici e registra i comandi informativi; `adapters/ribbon.py` risolve le QAction native e fornisce il toggle ETUX. `adapters/sketch.py` possiede observer GUI, connessione workbench e timer single-shot della continuità sketch. `ui/workbench.py` costruisce menu e toolbar una sola volta; `ui/ribbon.py` possiede il renderer, un timer di riattivazione cancellabile e il filtro Close, rilasciati su disattivazione. `Init.py` non importa la GUI, `InitGui.py` registra la workbench. Nessun riferimento persistente ai documenti o observer di modello.
 
 Vedi [architettura](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [requisiti](docs/REQUIREMENTS.md) e [confronto delle estensioni](docs/EXTENSIONS_COMPARISON.md). Tree e inspector restano nativi; il prototipo non replica editor JSON o servizi globali Ribbon/Nxt.

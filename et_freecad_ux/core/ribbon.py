@@ -28,11 +28,19 @@ SECTIONS = (
     ('Features', (
         ('Struttura', ('PartDesign_Body',), True),
         ('Volume', ('PartDesign_Pad', 'PartDesign_Pocket', 'PartDesign_Revolution'), True),
-        ('Finitura', ('PartDesign_Fillet', 'PartDesign_Chamfer'), False))),
+        ('Finitura', ('PartDesign_Fillet', 'PartDesign_Chamfer', 'PartDesign_Hole'), False),
+        ('Serie', ('PartDesign_Mirrored', 'PartDesign_LinearPattern', 'PartDesign_PolarPattern'), False),
+        ('Sweep', ('PartDesign_AdditivePipe', 'PartDesign_SubtractivePipe'), False))),
     ('Sketch', (
         ('Sessione', ('PartDesign_NewSketch', 'Sketcher_EditSketch', 'Sketcher_LeaveSketch'), True),
-        ('Geometria', ('Sketcher_CreateRectangle', 'Sketcher_CreateCircle'), True),
-        ('Quote e vincoli', ('Sketcher_ConstrainDistance', 'Sketcher_ConstrainRadius'), False))),
+        ('Geometria', ('Sketcher_CreateLine', 'Sketcher_CreateCircle',
+                       'Sketcher_CreateRectangle', 'Sketcher_CreateArc'), True),
+        ('Modifica', ('Sketcher_CreateFillet', 'Sketcher_Trimming'), False),
+        ('Vincoli', ('Sketcher_ConstrainHorizontal', 'Sketcher_ConstrainVertical',
+                     'Sketcher_ConstrainCoincident', 'Sketcher_ConstrainTangent',
+                     'Sketcher_ConstrainParallel', 'Sketcher_ConstrainPerpendicular'), False),
+        ('Quote', ('Sketcher_ConstrainDistance', 'Sketcher_ConstrainRadius',
+                   'Sketcher_ConstrainDiameter'), False))),
     ('Reference', (
         ('Riferimenti', ('PartDesign_Plane', 'PartDesign_Line', 'PartDesign_Point',
                          'PartDesign_CoordinateSystem', 'PartDesign_SubShapeBinder'), True),)),
