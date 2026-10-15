@@ -19,6 +19,17 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Diagnose parameter default scope (issue 9)
+        shell: powershell
+        run: |
+          @'
+          [CmdletBinding()]
+          param([string]$SourceDirectory = $PSScriptRoot)
+          Write-Host ('DEFAULT=[' + $SourceDirectory + '] BODY_ROOT=[' + $PSScriptRoot + ']')
+          try { [IO.Path]::GetFullPath($SourceDirectory) } catch { Write-Host ('DEFAULT_ERROR=' + $_.Exception.Message) }
+          '@ | Set-Content -LiteralPath ./binding-probe.ps1
+          powershell.exe -NoProfile -File ./binding-probe.ps1
+          pwsh.exe -NoProfile -File ./binding-probe.ps1
       - name: Windows PowerShell 5.1 isolated filesystem tests
         shell: powershell
         run: ./tests/windows/test-windows.ps1

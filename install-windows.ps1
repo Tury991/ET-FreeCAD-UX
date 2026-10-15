@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
 param(
-    [string]$SourceDirectory = $PSScriptRoot,
+    [string]$SourceDirectory,
     [string]$FreeCADUserDir,
     [string]$UserDataFile
 )
@@ -10,6 +10,13 @@ $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'tools/windows/ETUX.Windows.psm1') -Force
 
 try {
+    # Resolve only after script parameter binding, in this script's own scope.
+    if (-not $PSBoundParameters.ContainsKey('SourceDirectory')) {
+        $SourceDirectory = $PSScriptRoot
+    }
+    if ([string]::IsNullOrWhiteSpace($SourceDirectory)) {
+        throw 'La directory sorgente non puo essere vuota.'
+    }
     if (-not $FreeCADUserDir -and -not $UserDataFile) {
         $UserDataFile = Join-Path $PSScriptRoot 'freecad-user-path.json'
     }
