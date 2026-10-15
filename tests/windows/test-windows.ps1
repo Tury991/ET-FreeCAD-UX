@@ -102,6 +102,12 @@ try {
         & $engine -NoProfile -ExecutionPolicy Bypass -File $installer -UserDataFile $json -WhatIf
         Assert-True ($LASTEXITCODE -eq 0) 'Sorgente dipendente dalla directory corrente.'
         Assert-True ((Snapshot $user) -ne $before) 'Upgrade non osservabile.'
+        # Fresh profile: the same omitted source also supports first installation.
+        $fresh = Join-Path $case 'fresh profile'
+        [IO.Directory]::CreateDirectory($fresh) | Out-Null
+        $output = 'Y' | & $engine -NoProfile -ExecutionPolicy Bypass -File $installer -FreeCADUserDir $fresh 2>&1
+        Assert-True ($LASTEXITCODE -eq 0) ('Prima installazione -File fallita: ' + ($output -join "`n"))
+        Assert-ETUXIdentity (Get-ETUXTarget $fresh)
     }
     Test-Case 'installazione locale, spazi/Unicode e altre workbench' {
         param($user, $case)
@@ -159,6 +165,13 @@ try {
         param($user, $case)
         & (Join-Path $repo 'install-windows.ps1') -SourceDirectory $fixture -FreeCADUserDir $user -WhatIf
         Assert-True (@(Get-ChildItem -LiteralPath $user -Force).Count -eq 0) 'WhatIf ha scritto nel profilo.'
+    }
+    Test-Case 'sorgente esplicitamente vuota rifiutata senza fallback' {
+        param($user, $case)
+        Expect-Failure {
+            & (Join-Path $repo 'install-windows.ps1') -SourceDirectory '' -FreeCADUserDir $user -Confirm:$false
+        }
+        Assert-True (@(Get-ChildItem -LiteralPath $user -Force).Count -eq 0) 'Sorgente vuota ha scritto nel profilo.'
     }
     Test-Case 'pacchetto incompleto rifiutato' {
         param($user, $case)
