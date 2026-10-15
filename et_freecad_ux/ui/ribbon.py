@@ -12,6 +12,8 @@ class RibbonController:
         self.close_filter = None
         self.focus_filter = None
         self.activation_timer = None
+        self.sketch_session = None
+        self.sketch_row = False
 
     def schedule(self, callback):
         """Run after FreeCAD has restored the newly activated workbench bars."""
@@ -163,6 +165,9 @@ class RibbonController:
                 native_bar.setMaximumSize(0, 0)
             bar.show()
             self.watch_close(QtCore)
+            from et_freecad_ux.adapters.sketch import SketchRibbonSession
+            self.sketch_session = SketchRibbonSession(self.gui, self)
+            self.sketch_session.start()
         except Exception:
             self.deactivate()
             raise
@@ -270,8 +275,30 @@ class RibbonController:
         self.container.setMinimumHeight(self.container.layout().minimumSize().height())
         self.container.updateGeometry()
 
+    def show_for_sketch(self):
+        """Put only our toolbar after Sketcher's restored bars on its own row."""
+        from PySide import QtCore
+        window = self.gui.getMainWindow()
+        if self.sketch_row:
+            window.removeToolBarBreak(self.bar)
+        window.removeToolBar(self.bar)
+        window.addToolBar(QtCore.Qt.TopToolBarArea, self.bar)
+        window.insertToolBarBreak(self.bar)
+        self.sketch_row = True
+        self.bar.show()
+
+    def workbench_departed(self):
+        self.cancel_pending()
+        if self.sketch_session is not None:
+            self.sketch_session.departed()
+        else:
+            self.deactivate()
+
     def deactivate(self):
         self.cancel_pending()
+        session, self.sketch_session = self.sketch_session, None
+        if session is not None:
+            session.stop()
         if self.close_filter is not None:
             close_filter, self.close_filter = self.close_filter, None
             try:
@@ -303,8 +330,11 @@ class RibbonController:
         if bar is not None:
             try:
                 bar.hide()
+                if self.sketch_row:
+                    self.gui.getMainWindow().removeToolBarBreak(bar)
                 self.gui.getMainWindow().removeToolBar(bar)
                 bar.setParent(None)
                 bar.deleteLater()
             except RuntimeError:
                 pass
+        self.sketch_row = False

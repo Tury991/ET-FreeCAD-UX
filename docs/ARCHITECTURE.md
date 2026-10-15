@@ -1,4 +1,16 @@
-# Architettura V0.4b — Mechanical Workspace e Ribbon opzionale
+# Architettura V0.5a — Mechanical Workspace e Ribbon opzionale
+
+V0.5a amplia il catalogo a 41 azioni native, conservando la mappa unica
+Classic/Compact. `adapters/sketch.py` possiede la sessione temporanea di continuità
+Sketcher: observer GUI, connessione `workbenchActivated`, timer single-shot,
+soli nomi documento/oggetto e indice della scheda. Il controller rilascia la
+sessione prima dei widget su toggle, cambio volontario, fallback e chiusura.
+La transizione nativa confermata dall'evento InEdit conserva la Ribbon;
+`Deactivated` delega la verifica, senza forzare workbench o toccare task/modello.
+Dettagli attuali: [studio/matrice](COMMAND_MATRIX_V05A.md),
+[lifecycle](RIBBON_V05A.md), [verifica](VALIDATION_V05A.md).
+Le sezioni seguenti descrivono la base storica: V0.5a sostituisce il teardown
+immediato esclusivamente durante la transizione sketch confermata.
 
 La V0.3b mantiene questa architettura runtime e separa deployment/diagnostica
 in strumenti locali: [WINDOWS_TECHNICAL.md](WINDOWS_TECHNICAL.md).
