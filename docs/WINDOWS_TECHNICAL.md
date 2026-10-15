@@ -120,3 +120,45 @@ usa il runner con versione esatta e ripristina l'ambiente del processo. Non rich
 che l'utente finale configuri queste variabili. Risultati e limiti aggiornati:
 [VALIDATION_V03B.md](VALIDATION_V03B.md). GUI offscreen non equivale a desktop
 Windows 10/11, loader completo, ergonomia/DPI/temi o policy aziendali.
+
+## Correzione Issue #9: default sorgente e binding `-File`
+
+Causa riprodotta su Windows Server 2025, Windows PowerShell 5.1: nel blocco
+`param`, `[string]$SourceDirectory = $PSScriptRoot` riceve una stringa vuota
+quando lo script e il punto di ingresso di `powershell.exe -File`. Nel corpo
+lo stesso `$PSScriptRoot` contiene invece la directory corretta. Il probe CI
+mostra `DEFAULT=[] BODY_ROOT=[D:\a\ET-FreeCAD-UX\ET-FreeCAD-UX]`, seguito
+dall'eccezione `GetFullPath`: `The path is not of a legal form.`. Con `pwsh.exe`
+7 il default contiene gia la directory. Non e un difetto degli spazi o del JSON.
+
+La chiamata che fallisce e `[IO.Path]::GetFullPath($SourceDirectory)`
+nell'installer (riga 20 del main ff2217a), dopo `Get-ETUXUserDirectory` e
+`Get-ETUXTarget`. `Get-ETUXUserDirectory` legge `user_app_data_dir` dal JSON,
+lo converte in stringa, ne controlla la natura assoluta e chiama il proprio
+`GetFullPath` su quel valore. Il confronto della Issue con lo stesso JSON e
+sorgente esplicita, il probe isolato e il test dell'installer corretto con JSON
+valido distinguono i due input. La riga 72 originale e soltanto il rilancio
+esterno dell'eccezione, non il punto che costruisce il percorso errato.
+
+Correzione: il parametro non ha piu un'espressione default; nel corpo, dopo il
+binding, `PSBoundParameters.ContainsKey('SourceDirectory')` distingue omissione
+e valore esplicito. Solo l'omissione usa `$PSScriptRoot`; vuoto/whitespace
+espliciti sono rifiutati prima di qualsiasi scrittura. Non si usa la directory
+corrente come fallback e non si indovina il profilo FreeCAD. Restano identici
+validazione JSON, guardie, conferma, staging, backup e rollback.
+
+Regressione: la suite avvia l'eseguibile PowerShell corrente come nuovo processo
+con `-NoProfile -ExecutionPolicy Bypass -File`, senza `-SourceDirectory`:
+JSON relativo valido, copia locale con spazi/Unicode, installazione V0.4b simulata
+con marker `0.4.0b1` e file esclusivo della versione vecchia. Verifica exit code,
+identita nuova, assenza del vecchio file nel target, backup unico e contenuto
+V0.4b conservato. La conferma rimane attiva e riceve `Y` da stdin nel test.
+`-WhatIf` confronta percorsi e hash SHA256 dell'intero profilo prima/dopo,
+inclusi i backup; un'altra invocazione parte da una directory diversa.
+Sono coperti anche prima installazione tramite `-File` e sorgente esplicitamente
+vuota rifiutata. La CI esegue la suite separatamente con 5.1 e 7.
+
+Evidenza iniziale di diagnosi e regressione:
+[CI run 38717490208](https://github.com/Tury991/ET-FreeCAD-UX/actions/runs/38717490208),
+job `local-install-tests`. Sono prove filesystem Windows con profili temporanei,
+non un collaudo desktop interattivo Windows 10/11.

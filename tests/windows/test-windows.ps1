@@ -58,6 +58,57 @@ try {
     [IO.Directory]::CreateDirectory((Join-Path $fixture 'work')) | Out-Null
     [IO.File]::WriteAllText((Join-Path $fixture 'freecad-user-path.json'), 'PRIVATE')
 
+    Test-Case '-File senza SourceDirectory: V0.4b, WhatIf e aggiornamento' {
+        param($user, $case)
+        $engine = (Get-Process -Id $PID).Path
+        $installer = Join-Path $fixture 'install-windows.ps1'
+        $json = Join-Path $fixture 'freecad-user-path.json'
+        @{schema=1; application='FreeCAD'; user_app_data_dir=$user} |
+            ConvertTo-Json | Set-Content -LiteralPath $json -Encoding UTF8
+        # Seed a complete V0.4b installation, including a file absent in the update.
+        Install-Test $user
+        $target = Get-ETUXTarget $user
+        $marker = Join-Path $target 'etux-package.json'
+        @{schema=1; package_id='Tury991/ET-FreeCAD-UX'; version='0.4.0b1'} |
+            ConvertTo-Json | Set-Content -LiteralPath $marker -Encoding UTF8
+        [IO.File]::WriteAllText((Join-Path $target 'old-only.txt'), 'V04B')
+        function Snapshot([string]$Root) {
+            @(Get-ChildItem -LiteralPath $Root -Recurse -Force | Sort-Object FullName |
+                ForEach-Object {
+                    $hash = ''
+                    if (-not $_.PSIsContainer) { $hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash }
+                    $_.FullName + '|' + $hash
+                }) -join "`n"
+        }
+        $before = Snapshot $user
+        Push-Location $fixture
+        try {
+            # Same relative -File / JSON arguments as issue #9; no SourceDirectory.
+            $output = & $engine -NoProfile -ExecutionPolicy Bypass -File './install-windows.ps1' -UserDataFile './freecad-user-path.json' -WhatIf 2>&1
+            Assert-True ($LASTEXITCODE -eq 0) ('WhatIf -File fallito: ' + ($output -join "`n"))
+            Assert-True ((Snapshot $user) -eq $before) 'WhatIf ha modificato il profilo o i backup.'
+            # Pipe affirmative input so the real high-impact confirmation stays enabled.
+            $output = 'Y' | & $engine -NoProfile -ExecutionPolicy Bypass -File './install-windows.ps1' -UserDataFile './freecad-user-path.json' 2>&1
+            Assert-True ($LASTEXITCODE -eq 0) ('Upgrade -File fallito: ' + ($output -join "`n"))
+        } finally { Pop-Location }
+        Assert-ETUXIdentity $target
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $target 'old-only.txt'))) 'Upgrade non eseguito.'
+        $backups = @(Get-ChildItem -LiteralPath (Join-Path $user 'ETUX-Backups') -Directory)
+        Assert-True ($backups.Count -eq 1) 'Backup V0.4b mancante.'
+        Assert-True (([IO.File]::ReadAllText((Join-Path $backups[0].FullName 'old-only.txt'))) -eq 'V04B') 'Backup V0.4b alterato.'
+        $old = Get-Content -LiteralPath (Join-Path $backups[0].FullName 'etux-package.json') -Raw | ConvertFrom-Json
+        Assert-True ($old.version -eq '0.4.0b1') 'Versione backup errata.'
+        # Invocation from another working directory must still use the script copy.
+        & $engine -NoProfile -ExecutionPolicy Bypass -File $installer -UserDataFile $json -WhatIf
+        Assert-True ($LASTEXITCODE -eq 0) 'Sorgente dipendente dalla directory corrente.'
+        Assert-True ((Snapshot $user) -ne $before) 'Upgrade non osservabile.'
+        # Fresh profile: the same omitted source also supports first installation.
+        $fresh = Join-Path $case 'fresh profile'
+        [IO.Directory]::CreateDirectory($fresh) | Out-Null
+        $output = 'Y' | & $engine -NoProfile -ExecutionPolicy Bypass -File $installer -FreeCADUserDir $fresh 2>&1
+        Assert-True ($LASTEXITCODE -eq 0) ('Prima installazione -File fallita: ' + ($output -join "`n"))
+        Assert-ETUXIdentity (Get-ETUXTarget $fresh)
+    }
     Test-Case 'installazione locale, spazi/Unicode e altre workbench' {
         param($user, $case)
         $other = Join-Path $user 'Mod/OtherWorkbench'
@@ -114,6 +165,13 @@ try {
         param($user, $case)
         & (Join-Path $repo 'install-windows.ps1') -SourceDirectory $fixture -FreeCADUserDir $user -WhatIf
         Assert-True (@(Get-ChildItem -LiteralPath $user -Force).Count -eq 0) 'WhatIf ha scritto nel profilo.'
+    }
+    Test-Case 'sorgente esplicitamente vuota rifiutata senza fallback' {
+        param($user, $case)
+        Expect-Failure {
+            & (Join-Path $repo 'install-windows.ps1') -SourceDirectory '' -FreeCADUserDir $user -Confirm:$false
+        }
+        Assert-True (@(Get-ChildItem -LiteralPath $user -Force).Count -eq 0) 'Sorgente vuota ha scritto nel profilo.'
     }
     Test-Case 'pacchetto incompleto rifiutato' {
         param($user, $case)
