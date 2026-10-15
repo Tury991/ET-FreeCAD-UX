@@ -91,6 +91,11 @@ try {
         [IO.File]::Delete((Join-Path $target 'etux-package.json'))
         [IO.File]::Delete((Join-Path $target 'et_freecad_ux/adapters/ribbon.py'))
         [IO.File]::Delete((Join-Path $target 'et_freecad_ux/ui/ribbon.py'))
+        # A current catalog without its marker is not a legacy installation.
+        # Freeze the real V0.2-V0.4b catalog recognized by the existing guard;
+        # expanding commands must not silently rewrite the legacy fixture.
+        Copy-Item -LiteralPath (Join-Path $repo 'tests/windows/fixtures/catalog-v02.py.txt') `
+            -Destination (Join-Path $target 'et_freecad_ux/core/catalog.py') -Force
         Assert-ETUXIdentity $target
         Install-Test $user
         Assert-ETUXRuntime $target

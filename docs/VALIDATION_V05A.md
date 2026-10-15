@@ -105,6 +105,14 @@ nessuna validazione del viewport 3D o dell'interazione CAD col mouse.
 Escape/disegno col mouse, geometria finale di tutte le nuove feature/vincoli,
 temi host completi, DPI fisici/multi monitor, screen reader e coesistenza Nxt/Ribbon.
 La CI Windows della nuova PR non è inclusa in questi risultati locali.
+Il [primo avvio CI](https://github.com/Tury991/ET-FreeCAD-UX/actions/runs/38710955577)
+si è fermato nel fixture legacy degli script: il test eliminava il manifest
+dal catalogo corrente, che dalla V0.5a non coincide più con una versione legacy.
+Il test ora usa una copia congelata del catalogo V0.2–V0.4b, con SHA256
+`b68d36663554a7150bee2b670e59966702fce965ab7d3e043396533bfd6d31e0`.
+La guardia installer ha rifiutato correttamente la copia incoerente: nessuna
+modifica installer o correzione della Issue #9. Il primo job CAD era saltato,
+quindi non viene conteggiato come verifica Windows positiva.
 La presenza degli ID non garantisce una feature valida per ogni selezione.
 Il task Sketcher espone Close, non un pulsante Cancel con rollback globale.
 Il [collaudo manuale](RIBBON_V05A.md#checklist-manuale-windows-1011) copre i gate aperti.
