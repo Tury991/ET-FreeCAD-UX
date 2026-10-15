@@ -1,4 +1,4 @@
-# ET-FreeCAD-UX — V0.3b Windows First
+# ET-FreeCAD-UX — V0.4b Classic & Compact Modern Ribbon
 
 Workbench Python per FreeCAD **1.1.3**, con organizzazione originale dei comandi ispirata al workflow dei CAD parametrici professionali. Riusa Part Design e Sketcher; modello, solver, albero delle feature, proprietà, task panel e Undo/Redo restano nativi. Nessun codice o asset proprietario SolidWorks è copiato. Il progetto non è affiliato a SolidWorks o Dassault Systèmes.
 
@@ -9,28 +9,32 @@ Segui la [guida Windows 10/11](docs/WINDOWS_GUIDE.md) per installare e collaudar
 Body, sketch, Pad e altre feature. [Architettura Windows](docs/WINDOWS_TECHNICAL.md)
 e [risultati effettivi](docs/VALIDATION_V03B.md) distinguono CI/offscreen e desktop.
 
-## Comandi
+## Ribbon V0.4b — Classic e Compact Modern
 
-La V0.3a aggiunge un prototipo opzionale scritto per ET UX, senza dipendenze
-Ribbon/Nxt: quattro schede **Sketch, Features, Reference e Tools** con le stesse
-24 azioni native della V0.2 e i due comandi informativi. Le QAction sono condivise
-con le toolbar native: icone, traduzioni, abilitazione e dispatch restano FreeCAD.
-Il catalogo V0.2 è invariato. [Studio e scelta](docs/RIBBON_V03A.md).
+Ribbon opzionale con schede **Features, Sketch, Reference, Tools**, gruppi
+etichettati e separati, azioni native condivise e due densità dello stesso layout.
+**Classic Modern** è la densità predefinita (icone principali 40 DIP);
+**Compact Modern** usa icone 32 DIP e meno spazio verticale. La fascia cresce
+con i font: nessun limite rigido che tagli le etichette. Le schede scorrono
+orizzontalmente nelle finestre strette, mantenendo ordine e comandi.
 
-**Attivazione:** seleziona ET FreeCAD UX e usa `ET UX → Ribbon sperimentale →
-Attiva/disattiva Ribbon sperimentale`. **Disattivazione:** stesso comando oppure
-`Toolbar standard` nell'angolo della Ribbon. La scelta dura soltanto nella sessione
-e parte disattivata al riavvio. Durante il cambio di workbench il prototipo viene
-distrutto e ricreato al ritorno; la UI standard è il fallback in caso di errore.
-Le sole toolbar ET UX vengono compresse temporaneamente, senza cambiarne la
-visibilità memorizzabile; dimensioni, albero, proprietà e task nativi sono preservati.
-Due righe di pulsanti, altezza compatta e scorrimento orizzontale nelle schede
-per finestre strette. Nessuno stylesheet o asset SolidWorks.
+**Attivazione:** seleziona ET FreeCAD UX, poi `ET UX → Ribbon sperimentale →
+Attiva/disattiva Ribbon sperimentale`. Per cambiare densità usa **Classic Modern**
+o **Compact Modern** nello stesso menu, oppure il menu **Ribbon** in alto a
+destra della fascia. Il cambio è immediato, conserva scheda e task corrente;
+la sola densità viene ricordata tra riavvii nel namespace ET UX.
 
-**Verifica:** unitari, geometria e GUI offscreen su 1.1.3/Qt6 e 1.0/Qt5;
-risultati e limiti in [VALIDATION_V03A.md](docs/VALIDATION_V03A.md).
-Esperienza grafica interattiva, DPI, temi e coesistenza con addon restano da verificare
-su desktop. Nessuno screenshot è incluso.
+**Interfaccia standard:** `Ribbon → Toolbar standard` oppure lo stesso toggle.
+L'attivazione resta una scelta di sessione: al riavvio FreeCAD parte con le
+normali toolbar. Durante il cambio di workbench i widget ET UX vengono rimossi
+e ricreati al ritorno. Un errore Qt ripristina le toolbar native. Tema, viewport,
+albero e task restano gestiti da FreeCAD; palette e font sono applicati solo
+ai widget della Ribbon, con stylesheet locale e focus visibile.
+
+Tutte le 24 azioni native e le due informative rimangono disponibili.
+Il passaggio nativo a Sketcher e il ritorno automatico a ET UX quando si chiude
+lo sketch restano invariati. Nessun nuovo strumento CAD o dipendenza.
+Dettagli, differenze dai concept e prove: [Ribbon V0.4b](docs/RIBBON_V04B.md).
 
 Menu `ET UX` con quattro sottomenu e quattro toolbar native:
 
@@ -49,7 +53,7 @@ Non sono richiesti Ribbon, Nxt, pacchetti pip o un binding Qt esterno. ET UX non
 
 ## Installazione Windows da ZIP locale
 
-1. Scarica/estrai il branch `feature/windows-first-v0.3b`; apri la cartella con
+1. Scarica/estrai il branch `feat/v04b-modern-ribbon`; apri la cartella con
    `InitGui.py` e `install-windows.ps1`.
 2. In FreeCAD 1.1.3 apri con File → Apri `tools/export_user_directory.FCMacro`,
    eseguila dall'editor con Macro → Esegui macro/F6 e salva `freecad-user-path.json`
@@ -81,7 +85,7 @@ Non scegliere il profilo presumendo un percorso APPDATA fisso.
 ## Installazione manuale Linux
 
 1. In FreeCAD apri Visualizza → Pannelli → Console Python ed esegui `print(App.getUserAppDataDir())`. Usa il percorso restituito, poiché varia tra installazioni.
-2. Chiudi FreeCAD. Scarica o clona il branch `feature/windows-first-v0.3b` e colloca la directory completa in `<percorso restituito>/Mod/ET-FreeCAD-UX`. `InitGui.py` deve essere direttamente nella root dell'addon, senza una seconda cartella annidata. Preserva eventuali copie precedenti.
+2. Chiudi FreeCAD. Scarica o clona il branch `feat/v04b-modern-ribbon` e colloca la directory completa in `<percorso restituito>/Mod/ET-FreeCAD-UX`. `InitGui.py` deve essere direttamente nella root dell'addon, senza una seconda cartella annidata. Preserva eventuali copie precedenti.
 3. **Linux:** copia la directory oppure crea un collegamento con `ln -s /percorso/checkout "<directory utente>/Mod/ET-FreeCAD-UX"`, dopo aver creato `Mod`. Non sostituire un collegamento già presente senza controllarlo.
 4. Riavvia e seleziona **ET FreeCAD UX** nel selettore delle workbench. Abilita il pannello Report per leggere la guida e le eventuali diagnosi.
 

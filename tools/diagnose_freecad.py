@@ -32,6 +32,7 @@ def run(app=None, gui=None, qt=None):
     try:
         from et_freecad_ux import __version__
         from et_freecad_ux.core.catalog import GROUPS, NATIVE_COMMANDS
+        from et_freecad_ux.core.ribbon import SECTIONS
     finally:
         if inserted:
             sys.path.remove(root)
@@ -85,7 +86,7 @@ def run(app=None, gui=None, qt=None):
             labels = [tabs.tabText(i) for i in range(tabs.count())] if tabs else []
             report['ribbon_tabs'] = [label if label in ('Sketch', 'Features', 'Reference', 'Tools')
                                      else 'unexpected_label' for label in labels]
-            checks['four_tabs'] = labels == [g.label for g in GROUPS]
+            checks['four_tabs'] = labels == [label for label, _ in SECTIONS]
             wb.setRibbonEnabled(False)
             QtCore.QCoreApplication.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
             checks['ribbon_removed'] = not window.findChildren(QtWidgets.QToolBar, 'ETUX_RibbonPrototype')

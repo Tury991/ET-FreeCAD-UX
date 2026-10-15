@@ -1,4 +1,4 @@
-# Architettura V0.3a — Mechanical Workspace e Ribbon opzionale
+# Architettura V0.4b — Mechanical Workspace e Ribbon opzionale
 
 La V0.3b mantiene questa architettura runtime e separa deployment/diagnostica
 in strumenti locali: [WINDOWS_TECHNICAL.md](WINDOWS_TECHNICAL.md).
@@ -16,13 +16,19 @@ ET UX organizza il percorso documento → Body → sketch → feature → modifi
 
 ## Attivazione e delega
 
-`Initialize` carica i moduli richiesti senza attivare altre workbench, registra i comandi informativi e il toggle Ribbon, filtra il catalogo e costruisce menu/toolbar una sola volta. Il default è standard; nessuna preferenza viene scritta. `Activated` pianifica la ricreazione Ribbon solo se opt-in, dopo il ripristino toolbar dell'host; `Deactivated` annulla il timer e distrugge il renderer.
+`Initialize` carica i moduli richiesti senza attivare altre workbench, registra i comandi informativi e il toggle Ribbon, filtra il catalogo e costruisce menu/toolbar una sola volta. Il default è standard; la sola densità Ribbon viene letta/scritta nel namespace ET UX su scelta esplicita. `Activated` pianifica la ricreazione Ribbon solo se opt-in, dopo il ripristino toolbar dell'host; `Deactivated` annulla il timer e distrugge il renderer.
 
-`adapters/ribbon.py` risolve le QAction già presenti nelle sole toolbar ET UX, verificando unicità e cardinalità, e implementa `ETUX_ToggleRibbon`. `ui/ribbon.py` crea un QToolBar con QTabWidget, quattro QScrollArea e pulsanti su due righe. `setDefaultAction` mantiene identità, stato, testo, icone e dispatch nativi; niente proxy, polling o algoritmi CAD. Il facade PySide viene importato solo all'attivazione.
+`adapters/ribbon.py` risolve le QAction già presenti nelle sole toolbar ET UX, verificando unicità e cardinalità, e implementa `ETUX_ToggleRibbon`. `ui/ribbon.py` crea un QToolBar con QTabWidget, quattro QScrollArea con gruppi etichettati e pulsanti primari/secondari. `setDefaultAction` mantiene identità, stato, testo, icone e dispatch nativi; niente proxy, polling o algoritmi CAD. Il facade PySide viene importato solo all'attivazione.
 
 Il controller possiede widget, timer single-shot e filtro Close della finestra. Snapshot delle dimensioni minime/massime delle toolbar ET UX, compressione a zero senza `hide()` e ripristino idempotente prima di rimuovere il widget. FreeCAD memorizza la visibilità durante i cambi: modificarla con `hide()` ha fallito la prova di ritorno standard ed è stato eliminato. Nessuna toolbar esterna viene modificata. Il filtro Close ripristina prima della chiusura host; se la chiusura viene annullata resta la UI standard fino a nuova attivazione esplicita. Connessioni e figli Qt terminano con `deleteLater`; il runner drena DeferredDelete prima del teardown del runtime.
 
-Il controller non conserva documenti o selezioni. Fallimenti di import Qt, risoluzione o costruzione annullano l'opt-in, ripristinano le dimensioni e lasciano menu/toolbar V0.2 disponibili, con diagnosi Report. Nessuna lettura o scrittura di JSON/preferenze addon. Studio e limiti: [RIBBON_V03A.md](RIBBON_V03A.md).
+Il controller non conserva documenti o selezioni. Fallimenti di import Qt, risoluzione o costruzione annullano l'opt-in, ripristinano le dimensioni e lasciano menu/toolbar V0.2 disponibili, con diagnosi Report. Nessuna lettura o scrittura di configurazioni di addon terzi.
+`core/ribbon.py` contiene una sola mappa di presentazione e due densità immutabili.
+`adapters/ribbon.py` conserva `RibbonDensity` nel solo namespace ET UX e registra
+le scelte Classic/Compact. Il renderer cambia metriche senza ricreare azioni o
+chiudere task. Il filtro posseduto ascolta anche palette/font/stile della finestra,
+applicandoli soltanto ai widget ET UX; lo stylesheet resta locale. Dettagli e
+limiti: [RIBBON_V04B.md](RIBBON_V04B.md).
 
 I comandi di modellazione sono le **azioni native**, non wrapper Python: FreeCAD valuta il contesto ad ogni aggiornamento, conserva selezioni, Body attivo e transazioni. Non si usa `addObject` nel prodotto. Non si auto-crea un documento/Body e non si forza un Body diverso; con più Body l'utente sceglie nell'albero. Il task sketch può cambiare workbench secondo FreeCAD; ET UX non intercetta né modifica questo comportamento.
 

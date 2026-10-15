@@ -33,3 +33,32 @@ class ToggleRibbonCommand:
     def Activated(self):
         wb = self.gui.activeWorkbench()
         wb.setRibbonEnabled(not wb._etux_ribbon_enabled)
+
+
+PREFERENCE_PATH = 'User parameter:BaseApp/Preferences/Mod/ETFreeCADUX'
+
+
+def read_density(app):
+    from et_freecad_ux.core.ribbon import density
+    return density(app.ParamGet(PREFERENCE_PATH).GetString('RibbonDensity', 'classic')).key
+
+
+def write_density(app, key):
+    from et_freecad_ux.core.ribbon import DENSITIES
+    if key not in tuple(item.key for item in DENSITIES):
+        raise ValueError('Densità Ribbon non valida: ' + str(key))
+    app.ParamGet(PREFERENCE_PATH).SetString('RibbonDensity', key)
+
+
+class RibbonDensityCommand(ToggleRibbonCommand):
+    def __init__(self, gui, key):
+        super().__init__(gui)
+        self.key = key
+
+    def GetResources(self):
+        from et_freecad_ux.core.ribbon import density
+        return {'MenuText': density(self.key).label,
+                'ToolTip': 'Memorizza la densità della sola Ribbon ET UX; applicazione immediata'}
+
+    def Activated(self):
+        self.gui.activeWorkbench().setRibbonDensity(self.key)
