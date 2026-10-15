@@ -12,6 +12,7 @@ non è disponibile per errore di connessione al proxy; consegna tramite API GitH
 | Python Linux senza FreeCAD/Qt | 26 casi: 25 passati, 1 skip PowerShell assente | Non applicabile | Import e failure path senza host/Qt |
 | FreeCAD 1.1.3 ufficiale, Python 3.11.14, Qt6 6.8.3 | 25 passati, 1 skip | 8 passati | Passati a devicePixelRatio 1.0, 1.25, 1.5 |
 | FreeCAD 1.0.0 Debian, Python 3.13.5, Qt5 5.15.15 | 25 passati, 1 skip | 8 passati | Passati a devicePixelRatio 1.0 |
+| CI Windows Server 2025, FreeCAD 1.1.3, Qt6 6.8.3 | 26 passati, nessuno skip | 8 passati | Layout, Ribbon, CAD, cleanup, diagnostica e chiusura passati a devicePixelRatio 1.0 |
 
 Ogni avvio host usa profili XDG temporanei e il runner con controllo esatto di
 versione. I tre avvii 1.1.3 usano `QT_SCALE_FACTOR=1`, `1.25`, `1.5`. Il layout
@@ -19,9 +20,9 @@ richiede finestre 1920×1080, 1600×900 e 1366×768 in pixel equivalenti, conver
 in coordinate logiche con il rapporto Qt effettivo, più una finestra stretta.
 Queste simulazioni offscreen non equivalgono alla scala display Windows reale.
 
-Per ciascun avvio: **384 controlli scheda/layout** su due palette sintetiche,
+Per ciascun avvio GUI: **384 controlli scheda/layout** su due palette sintetiche,
 font 100/125/150%, quattro passaggi Classic/Compact, quattro dimensioni e quattro
-schede; 1152 casi su 1.1.3, più 384 su 1.0. Verificati:
+schede; 1152 casi su 1.1.3, più 384 su 1.0 e 384 su Windows 1.1.3. Verificati:
 
 - Pulsanti non inferiori alle metriche minime, nessun taglio verticale,
   scorrimento e visibilità dei comandi, inclusi quelli raggiunti con focus.
@@ -89,19 +90,19 @@ dei minimi precedenti per ridurre correttamente Compact dopo un cambio font.
 La diagnostica è stata aggiornata all'ordine Features/Sketch delle schede.
 I tentativi con queste anomalie non sono conteggiati come prove superate.
 
-**Non eseguiti:** PowerShell (assente), Windows interattivo 10/11, installazione
+**Non eseguiti:** Windows interattivo 10/11, installazione
 V0.4b dal loader dopo riavvio su Windows, multi monitor, temi FreeCAD completi,
 accessibilità con screen reader e collaudo manuale geometrico completo.
 I due nuovi casi PowerShell coprono upgrade da marker V0.3b senza nuova mappa
-Ribbon e rifiuto di una sorgente V0.4b incompleta; richiedono CI/Windows o pwsh.
+Ribbon e rifiuto di una sorgente V0.4b incompleta; sono passati in CI Windows.
 Il test upgrade usa un fixture del contratto V0.3b, non un desktop aggiornato.
 
 Il comportamento Sketcher/ritorno accettato dall'utente non è stato modificato.
 La prova automatica dispatch non sostituisce il percorso interattivo Windows.
 Gli avvisi OpenGL/propagateSizeHints dell'offscreen restano attesi: nessuna
 certificazione del viewport. Coesistenza con Ribbon/Nxt non provata. Installer,
-backup e rimozione conservano il flusso esistente; la verifica dei nuovi casi
-PowerShell resta necessaria prima di dichiararne il collaudo Windows completo.
+backup e rimozione conservano il flusso esistente e superano i casi automatici;
+il collaudo manuale Windows completo resta necessario.
 
 Nel bootstrap minimale Debian 1.0 compare anche `ModuleNotFoundError:
 AttachmentEditor` da un loader host: non è un fallimento degli assert ET UX,
@@ -111,11 +112,19 @@ task sul desktop con installazione completa resta parte del collaudo manuale.
 
 ## Verifica CI Windows della PR #8
 
-Il primo avvio CI ha superato **18 prove installer su PowerShell 5.1 e 18 su
-PowerShell 7**, inclusi i due nuovi casi upgrade/incompletezza. FreeCAD Windows
-ha superato i 384 casi layout e gli smoke Ribbon/CAD, poi è terminato in modo
-anomalo durante la fase successiva allo smoke. Tale avvio GUI è **fallito**,
-non certificato. Per isolare il cleanup sono stati aggiunti marcatori e tracing
-nel solo runner. Il focus ora usa un filtro Qt posseduto, rimosso da tutti i
-pulsanti prima della distruzione: nessun override Python di QToolButton.
-La PR riporta lo stato aggiornato delle esecuzioni successive.
+[CI riuscita sul commit runtime finale c763d28](https://github.com/Tury991/ET-FreeCAD-UX/actions/runs/38697855654):
+**18 prove installer su PowerShell 5.1 e 18 su PowerShell 7**, inclusi i nuovi
+casi upgrade/incompletezza. FreeCAD Windows 1.1.3/Qt6 6.8.3 supera **26 unitari,
+8 geometrici, 384 casi layout**, smoke Ribbon/CAD, cleanup, diagnostica e
+chiusura, exit code 0. Nessuno skip sul runner Windows.
+
+Il primo tentativo CI aveva superato layout e CAD ma terminava in modo anomalo
+nel cleanup: è registrato come **fallito**, non come validazione positiva.
+La versione finale usa un filtro focus posseduto e rimosso prima della
+distruzione dei pulsanti, evitando override Python di QToolButton. I marcatori
+nel runner verificano anche il completamento delle fasi di cleanup. Non è stata
+necessaria alcuna modifica alle transizioni native Sketcher o ai task CAD.
+
+Queste prove riguardano il processo **offscreen di CI**, non un desktop Windows
+10/11 interattivo. I limiti indicati sopra restano aperti. I log della CI sono
+collegati nella PR; la documentazione finale non modifica il runtime validato.
