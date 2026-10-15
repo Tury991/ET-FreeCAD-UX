@@ -70,10 +70,12 @@ le proprie impostazioni normalmente: ET UX non intercetta tale comportamento.
 
 ## Aggiornamento Windows dalla V0.4b
 
-L'installer e la correzione della [Issue #9](https://github.com/Tury991/ET-FreeCAD-UX/issues/9)
-sono esclusi da questa PR. Non interpretare questo aggiornamento come soluzione
-al problema installer. Segui la [guida Windows](WINDOWS_GUIDE.md) per il flusso
-esistente; in caso di problema #9 è possibile usare questa sostituzione manuale:
+Il branch della PR #10 include ora `main` **a9925e5**, con la correzione installer
+della [PR #11](https://github.com/Tury991/ET-FreeCAD-UX/pull/11) per la Issue #9.
+Il fix è importato senza modifiche e non cambia le funzionalità V0.5a.
+Segui la [guida Windows](WINDOWS_GUIDE.md) usando l'installer della nuova copia:
+non occorre specificare `-SourceDirectory`; prova prima con `-WhatIf`.
+Rimane disponibile anche questa alternativa manuale:
 
 1. In FreeCAD V0.4b rileva `App.getUserAppDataDir()` dalla console Python.
    Salva i documenti, poi chiudi tutti i processi FreeCAD.

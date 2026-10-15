@@ -7,7 +7,7 @@ esiti della procedura qui sotto sulla tua macchina.
 
 ## Installazione dalla copia scaricata
 
-1. Scarica lo ZIP del branch `feat/v04b-modern-ribbon` dalla pagina GitHub
+1. Scarica lo ZIP del branch `main` dalla pagina GitHub
    del progetto (Code → Download ZIP) ed estrailo con Esplora file. Non eseguire
    comandi che scaricano ed eseguono script dalla rete. Apri la cartella che contiene
    **InitGui.py, install-windows.ps1, uninstall-windows.ps1 ed etux-package.json**.
@@ -45,7 +45,26 @@ assoluto ottenuto dalla Console Python di FreeCAD con
 Un file percorso vecchio si riferisce al vecchio profilo: rigenera il JSON dopo
 aver cambiato profilo/versione portable. La macro non modifica preferenze.
 
-Per un'anteprima senza scritture aggiungi `-WhatIf` al comando. Non usare
+La sorgente predefinita e la cartella che contiene lo script eseguito:
+non occorre `-SourceDirectory`, anche se il terminale e aperto altrove (in tal
+caso passa percorsi completi a `-File` e `-UserDataFile`). `-SourceDirectory`
+resta disponibile per scegliere esplicitamente un'altra copia locale completa;
+un valore esplicitamente vuoto viene rifiutato.
+
+**Errore `GetFullPath` nelle copie precedenti (Issue #9):** usa gli script della
+nuova copia completa. Su PowerShell 5.1 il vecchio default della sorgente veniva
+valutato vuoto durante il binding con `-File`; ora viene risolto nel corpo dello
+script. Non serve modificare il JSON o aggiungere `-SourceDirectory`.
+[Diagnosi e regressioni](WINDOWS_TECHNICAL.md#correzione-issue-9-default-sorgente-e-binding--file).
+
+Per un'anteprima senza scritture, valida anche prima di aggiornare V0.4b:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\install-windows.ps1" -UserDataFile ".\freecad-user-path.json" -WhatIf
+```
+
+L'anteprima controlla copia, profilo e installazione esistente, mostra la
+destinazione e non crea Mod, staging o backup. Togli `-WhatIf` per installare. Non usare
 `-Confirm:$false` nel collaudo manuale: lascia visibile la conferma.
 
 ## Primo avvio e Ribbon
@@ -107,10 +126,10 @@ scorrimento orizzontale e accesso all'ultimo comando anche con finestra stretta.
 Chiudi e riapri: la densità scelta deve essere conservata; la Ribbon parte spenta.
 Le immagini V0.4b sono catture Linux **offscreen**, non prove Windows interattive.
 
-## Aggiornare V0.3b e tornare alla versione precedente
+## Aggiornare V0.3b/V0.4b e tornare alla versione precedente
 
-Per aggiornare V0.3b a V0.4b usa l'installer della **nuova** copia: riconosce
-il marker `etux-package.json` V0.3b e conserva l'installazione precedente nel backup.
+Per aggiornare una copia V0.3b o V0.4b usa l'installer della **nuova** copia: riconosce
+il marker `etux-package.json` della versione precedente e conserva l'installazione precedente nel backup.
 Estrai la nuova copia in una **cartella separata**, riesegui la macro percorso
 se necessario, chiudi FreeCAD e ripeti il comando di installazione dalla nuova
 cartella. La vecchia installazione viene spostata integralmente in

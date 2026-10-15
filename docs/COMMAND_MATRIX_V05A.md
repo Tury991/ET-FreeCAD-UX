@@ -1,5 +1,9 @@
 # Matrice comandi V0.5a e analisi preliminare
 
+Aggiornamento del branch PR #10: integrato `main` **a9925e5** con la PR #11
+(fix installer Windows), senza modificare catalogo, runtime o funzionalità V0.5a.
+L'analisi preliminare sotto conserva la base originale e il proprio ambito.
+
 Base: `main` **ff2217a0e37cac6aa084ddbe6b5fa6033ebf21fe** (V0.4b),
 verificata il 15 ottobre 2026 via GitHub. Checkout ricostruito dai blob remoti,
 con verifica SHA di ogni blob, tree e commit. Nessun aggiornamento installer (#9).

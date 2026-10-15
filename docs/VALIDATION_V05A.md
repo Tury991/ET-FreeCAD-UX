@@ -1,5 +1,38 @@
 # Verifica V0.5a — 15 ottobre 2026
 
+## Aggiornamento PR #10 con main/PR #11
+
+Integrato `main` **a9925e5bd48e4eded4a5e8208c5864d3ed905d55**, che include
+la PR #11, nel branch `feat/v05a-mechanical-sketch-ribbon`. La V0.5a precedente
+era al commit remoto **7fbe03cb0e97a107c4d18cb07db644037757da3b**.
+Nessuna modifica ai sorgenti `et_freecad_ux`, loader, versione, catalogo,
+renderer, observer o smoke di continuità Sketcher.
+
+Il file `install-windows.ps1` è identico a quello di main/PR #11: default della
+sorgente risolto nel corpo solo se omesso e valori esplicitamente vuoti rifiutati.
+Conservati conferma, guardie, backup e rollback. La suite Windows combina tutti
+i **20 casi** di main (inclusi `-File` reale senza `-SourceDirectory`, `-WhatIf`,
+backup V0.4b e prima installazione) con il fixture storico già congelato in V0.5a.
+Non si reintroduce il vecchio fixture ricavato dal catalogo corrente.
+
+Regressioni rieseguite sul contenuto integrato:
+
+| Ambiente | Esito |
+| --- | --- |
+| Python Linux | 36 unitari, 35 passati e 1 skip PowerShell assente |
+| FreeCAD Linux 1.1.3 / Qt6 6.8.3 | 36 unitari (1 skip), 8 geometrici, 384 casi layout, quattro percorsi Sketch Ribbon, GUI/diagnostica/chiusura passati; exit code 0 |
+| FreeCAD Linux 1.0.0 / Qt5 5.15.15 | Stesse suite passate; exit code 0; resta il limite host AttachmentEditor descritto sotto |
+
+I quattro percorsi coprono Classic/Compact e palette chiara/scura, creazione e
+modifica sketch, chiusura, task e QAction condivisi, vincolo nativo, Undo/Redo,
+cambio volontario workbench, cambio/chiusura documento e cleanup. Comandi
+riproducibili invariati nelle sezioni seguenti. `git diff --check` passa.
+
+I risultati Windows rieseguiti sul nuovo commit e il collegamento alla CI sono
+riportati nella [descrizione aggiornata della PR #10](https://github.com/Tury991/ET-FreeCAD-UX/pull/10).
+Le sezioni seguenti conservano l'evidenza iniziale antecedente all'integrazione.
+Nessuna dichiarazione di collaudo Windows interattivo; nessun merge della PR #10.
+
 Base `main` V0.4b **ff2217a0e37cac6aa084ddbe6b5fa6033ebf21fe**,
 verificata tramite connettore GitHub. Il checkout iniziale era V0.4a e il proxy
 Git HTTPS non rispondeva: i file aggiornati sono stati recuperati via API,

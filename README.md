@@ -39,7 +39,8 @@ Il passaggio a Sketcher e il ritorno restano gestiti da FreeCAD: nessun cambio
 di workbench imposto, task sostitutivo o algoritmo geometrico ET UX.
 [Matrice comandi e studio](docs/COMMAND_MATRIX_V05A.md),
 [utilizzo, aggiornamento Windows e checklist](docs/RIBBON_V05A.md),
-[risultati e limiti](docs/VALIDATION_V05A.md). La correzione installer #9 è esclusa.
+[risultati e limiti](docs/VALIDATION_V05A.md). Il branch include ora il fix installer
+#9 tramite l'aggiornamento a `main` con la PR #11, senza modifiche alla V0.5a.
 
 Menu `ET UX` con quattro sottomenu e quattro toolbar native:
 
